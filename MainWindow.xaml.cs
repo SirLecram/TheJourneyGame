@@ -36,6 +36,7 @@ namespace TheJourneyGame
             InitializeComponent();
             InitializeGame();
             InitializeBinding();
+
             
         }
 
