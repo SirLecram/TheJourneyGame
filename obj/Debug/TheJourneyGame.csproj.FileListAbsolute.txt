@@ -1,0 +1,15 @@
+C:\Users\MarcelPC\Desktop\Na studia\Informatyka\C#\Ksiazka\TheJourneyGame\TheJourneyGame\bin\Debug\TheJourneyGame.exe.config
+C:\Users\MarcelPC\Desktop\Na studia\Informatyka\C#\Ksiazka\TheJourneyGame\TheJourneyGame\bin\Debug\TheJourneyGame.exe
+C:\Users\MarcelPC\Desktop\Na studia\Informatyka\C#\Ksiazka\TheJourneyGame\TheJourneyGame\bin\Debug\TheJourneyGame.pdb
+C:\Users\MarcelPC\Desktop\Na studia\Informatyka\C#\Ksiazka\TheJourneyGame\TheJourneyGame\obj\Debug\TheJourneyGame.csprojResolveAssemblyReference.cache
+C:\Users\MarcelPC\Desktop\Na studia\Informatyka\C#\Ksiazka\TheJourneyGame\TheJourneyGame\obj\Debug\MainWindow.g.cs
+C:\Users\MarcelPC\Desktop\Na studia\Informatyka\C#\Ksiazka\TheJourneyGame\TheJourneyGame\obj\Debug\App.g.cs
+C:\Users\MarcelPC\Desktop\Na studia\Informatyka\C#\Ksiazka\TheJourneyGame\TheJourneyGame\obj\Debug\TheJourneyGame_MarkupCompile.cache
+C:\Users\MarcelPC\Desktop\Na studia\Informatyka\C#\Ksiazka\TheJourneyGame\TheJourneyGame\obj\Debug\TheJourneyGame_MarkupCompile.lref
+C:\Users\MarcelPC\Desktop\Na studia\Informatyka\C#\Ksiazka\TheJourneyGame\TheJourneyGame\obj\Debug\MainWindow.baml
+C:\Users\MarcelPC\Desktop\Na studia\Informatyka\C#\Ksiazka\TheJourneyGame\TheJourneyGame\obj\Debug\TheJourneyGame.g.resources
+C:\Users\MarcelPC\Desktop\Na studia\Informatyka\C#\Ksiazka\TheJourneyGame\TheJourneyGame\obj\Debug\TheJourneyGame.Properties.Resources.resources
+C:\Users\MarcelPC\Desktop\Na studia\Informatyka\C#\Ksiazka\TheJourneyGame\TheJourneyGame\obj\Debug\TheJourneyGame.csproj.GenerateResource.Cache
+C:\Users\MarcelPC\Desktop\Na studia\Informatyka\C#\Ksiazka\TheJourneyGame\TheJourneyGame\obj\Debug\TheJourneyGame.csproj.CoreCompileInputs.cache
+C:\Users\MarcelPC\Desktop\Na studia\Informatyka\C#\Ksiazka\TheJourneyGame\TheJourneyGame\obj\Debug\TheJourneyGame.exe
+C:\Users\MarcelPC\Desktop\Na studia\Informatyka\C#\Ksiazka\TheJourneyGame\TheJourneyGame\obj\Debug\TheJourneyGame.pdb
