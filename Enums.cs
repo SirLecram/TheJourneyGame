@@ -7,6 +7,11 @@
         Right = 25,
         Down = 26,
     }
+    public interface IFightable
+    {
+        void Attack(IFightable atackDestination);
+        bool TakeAHit(int hpToTake);
+    }
 
 
 }

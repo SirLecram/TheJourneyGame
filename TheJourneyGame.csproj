@@ -70,9 +70,14 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\Bat.cs" />
+    <Compile Include="Model\Bow.cs" />
+    <Compile Include="Model\Enemy.cs" />
     <Compile Include="Model\Equipment.cs" />
+    <Compile Include="Model\Mace.cs" />
     <Compile Include="Model\Player.cs" />
     <Compile Include="Model\Position.cs" />
+    <Compile Include="Model\Sword.cs" />
     <Compile Include="Model\Weapon.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -104,6 +109,15 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="image\weapon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\sword.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\sword100x100.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\sword30x30.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

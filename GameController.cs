@@ -14,10 +14,13 @@ namespace TheJourneyGame
     class GameController : INotifyPropertyChanged
     {
         public  IEnumerable<Weapon> WeaponsInRoom { get; private set; }
-        private Player _player { get; set; }
-        public Point PlayerLocation { get => _player.Location; }
+        private static Player _player { get; set; }
+        public static Point PlayerLocation { get => _player.Location; }
         public int PlayerHitPoints { get => _player.HitPoints; }
         private Canvas _playArea { get; }
+        private List<Enemy> _enemiesList { get; set; }
+        public IEnumerable<Enemy> EnemiesList { get => _enemiesList; }
+        public Point playerLocation { get => location(); }
 
 
         public double PlayerXPosition { get => _player.Location.X; }
@@ -26,10 +29,19 @@ namespace TheJourneyGame
         public GameController(Canvas playArea)
         {
             _playArea = playArea;
-            /*Weapon wp = new Weapon(new Point(18, 200), "Miecz", @"\image\weapon.png");
-            _playArea.Children.Add(wp.WeaponAppearance);
-            Canvas.SetLeft(wp.WeaponAppearance, wp.Location.X);
-            Canvas.SetBottom(wp.WeaponAppearance, wp.Location.Y);*/
+            _enemiesList = new List<Enemy>();
+             Weapon wp = new Sword(new Point(250, 200), "Miecz", @"\image\sword30x30.png", 10);
+             _playArea.Children.Add(wp.WeaponAppearance);
+             Canvas.SetLeft(wp.WeaponAppearance, wp.Location.X);
+             Canvas.SetBottom(wp.WeaponAppearance, wp.Location.Y);
+            _enemiesList.Add(new Bat(new Point(140, 140), playArea, 20));
+            _enemiesList.Add(new Bat(new Point(300, 150), playArea, 30));
+            _playArea.Children.Add(_enemiesList[0].EnemyAppearance);
+            _playArea.Children.Add(_enemiesList[1].EnemyAppearance);
+            Canvas.SetLeft(_enemiesList[0].EnemyAppearance, _enemiesList[0].Location.X);
+            Canvas.SetBottom(_enemiesList[0].EnemyAppearance, _enemiesList[0].Location.Y);
+            Canvas.SetLeft(_enemiesList[1].EnemyAppearance, _enemiesList[1].Location.X);
+            Canvas.SetBottom(_enemiesList[1].EnemyAppearance, _enemiesList[1].Location.Y);
             _player = new Player(new Point(250, 20), 10);
             _playArea.Children.Add(_player.PlayersAppearance);
             Canvas.SetLeft(_player.PlayersAppearance, _player.Location.X);
@@ -38,7 +50,10 @@ namespace TheJourneyGame
             
             
         }
-
+        public Point location()
+        {
+            return _player.Location;
+        }
         #region Initialization & help methods
         private void InitializePlayerPositionBinding()
         {
@@ -64,11 +79,16 @@ namespace TheJourneyGame
         public void Move(Direction direction)
         {
             _player.Move(direction, _playArea);
-            OnPropertyChanged("PlayerLocation");
+            OnPropertyChanged("playerLocation");
             OnPropertyChanged("PlayerXPosition");
             OnPropertyChanged("PlayerYPosition");
         }
-
+        public void AttackEnemy()
+        {
+            
+            _player.Attack(_enemiesList[0]);
+            _player.Attack(_enemiesList[1]);
+        }
         
         
 
