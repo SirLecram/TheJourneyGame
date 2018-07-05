@@ -119,5 +119,19 @@
   <ItemGroup>
     <Resource Include="image\sword30x30.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\Pomieszczenie.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\Ekwipunek.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\BatEnemy.png" />
+    <Resource Include="image\BatHited.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\Player.png" />
+    <Resource Include="image\PlayerHit.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

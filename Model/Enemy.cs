@@ -12,7 +12,7 @@ namespace TheJourneyGame.Model
 {
     abstract class Enemy : Position, IFightable
     {
-        private int AttackRange { get; }
+        protected int _attackRange { get; set; }
         public int HitPoints { get; protected set; }
         public bool IsDead { get { if (HitPoints <= 0) return true; else return false; } }
         public DispatcherTimer timer = new DispatcherTimer();
@@ -44,26 +44,24 @@ namespace TheJourneyGame.Model
             base.Move(direction, playArea);
             Canvas.SetLeft(EnemyAppearance, Location.X);
             Canvas.SetBottom(EnemyAppearance, Location.Y);
-            if(EnemyAppearance.Source != new BitmapImage(new Uri(@"\image\kwadrat.png", UriKind.Relative)))
-            {
-                EnemyAppearance.Source = new BitmapImage(new Uri(@"\image\kwadrat.png", UriKind.Relative));
-            }
+            
+            
             // DODAC:
             // ########### WARUNKI ATAKU ########
             // ########### NIE WCHODZENIE NA GRACZa ########
         }
-        public bool TakeAHit(int hp)
+        public virtual bool TakeAHit(int hp)
         {
             HitPoints -= hp;
-            EnemyAppearance.Source = new BitmapImage(new Uri(@"\image\sword30x30.png", UriKind.Relative));
+            
             if (IsDead)
+            {
                 _playArea.Children.Remove(this.EnemyAppearance);
+                return true;
+            }
             return false;
         }
 
-        public void Attack(IFightable atackDestination)
-        {
-            throw new NotImplementedException();
-        }
+        public abstract void Attack(IFightable atackDestination);
     }
 }
