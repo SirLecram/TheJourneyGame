@@ -9,18 +9,48 @@ namespace TheJourneyGame.Model
 {
     class Bow : Weapon
     {
-        public const int Range = 100;
         private const int _attackDirections = 1;
 
 
         public Bow(Point point, string name, string imagePath, int damage) 
-            : base(point, name, imagePath, damage)
+            : base(point, name, imagePath, damage, 150)
         {
+            EqType = EquipmentType.Bow;
+            WeaponAppearance.ToolTip = "Attack Directions: " + _attackDirections.ToString() + ";\n" +
+                "Attack Range: " + Range.ToString() + ";\n" + "Damage: " + Damage.ToString() + ";";
         }
 
-        public override bool UseWeapon(Point point, Direction sightDirection)
+        public override bool UseWeapon(Point enemyLocation, Direction sightDirection)
         {
-            throw new NotImplementedException();
+            switch (sightDirection)
+            {
+                case Direction.Right:
+                    if (enemyLocation.X < GameController.PlayerLocation.X
+                        || enemyLocation.Y > GameController.PlayerLocation.Y + 25
+                        || enemyLocation.Y < GameController.PlayerLocation.Y - 25)
+                        return false;
+                    break;
+                case Direction.Up:
+                    if (enemyLocation.Y <= GameController.PlayerLocation.Y 
+                        || enemyLocation.X > GameController.PlayerLocation.X + 25
+                        || enemyLocation.X < GameController.PlayerLocation.X - 25)
+                        return false;
+                    break;
+                case Direction.Left:
+                    if (enemyLocation.X > GameController.PlayerLocation.X
+                        || enemyLocation.Y > GameController.PlayerLocation.Y + 25
+                        || enemyLocation.Y < GameController.PlayerLocation.Y - 25)
+                        return false;
+                    break;
+                case Direction.Down:
+                    if (enemyLocation.Y > GameController.PlayerLocation.Y
+                        || enemyLocation.X > GameController.PlayerLocation.X + 25
+                        || enemyLocation.X < GameController.PlayerLocation.X - 25)
+                        return false;
+                    break;
+                default: break;
+            }
+            return true;
         }
     }
 }

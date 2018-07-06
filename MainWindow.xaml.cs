@@ -16,16 +16,15 @@ using System.Windows.Shapes;
 namespace TheJourneyGame
 {
     /// <summary>
-    /// Ostatnio dodane: Grafika pomieszczenie, ekwipunek (wstepnie), Bat, Ulepszenie metody Bat.Move() i
-    /// Bat.TakeAHit(); Dodanie animacji uderzenia do Player i Bat; Dodanie Timera wyznaczajacego
-    /// czestotliwosc ataku potworow; Dalsza implementacja IFightable; Poprawa czytelności, kilka komentarzy;
-    /// PODNOSZENIE PRZEDMIOTOW - Moze tworzyc image w klasie GameController do której dostarcze
-    /// Grid.Name = equipment? 
+    /// Ostatnio dodane: Ulepszanie podnoszenia przedmiotow; Slownnik z mozliwym ekwipunkiem;
+    /// Mozliwe wybieranie przedmiotu aktualnie uzywanego; Rozwój pozostalych klas pochodnych od weapon;
+    /// Bow, Mace - dodano sprawdzanie kierunku i odleglosci; Dodano tooltips opisujace bronie; 
+    /// Tooltips z opisami rowniez w ekwipunku GUI; Bindowanie HP Enemy do ProgressBar;
+    /// Zamiana EnemyApperiance na EnemyStackPanel; Dodano obrazenia wzgledem broni; Enum eqType
     /// 
-    /// Do zrobienia niedługo: Zarys pochodnych weapon i dzialanie, Enemy -> rodzaje, poruszanie (usprawnienie); 
-    ///  Bindowanie HP, StackPanel ??; Podnoszenie przedmiotów;
-    /// Ekwipunek, wybór
-    /// 
+    /// Do zrobienia niedługo: Enemy -> rodzaje, poruszanie (usprawnienie - zeby szly w kierunku gracza); 
+    /// Bindowanie HP, StackPanel ??; Equipment (inne niż weapon); Usprawnienie dodawania ToolTips
+    /// do obrazkow w ekwipunku (prawdopoodbny problem z potionami); Dodanie tooltips do Enemy
     /// 
     /// Zrobione: Szkielet klasy GameController, (abstr) Position, Player; stworzone pole gry, 
     /// podstawowe dzialanie metody Move() (Equipment, zarys Player); Bindowanie pozycji gracza;
@@ -35,6 +34,9 @@ namespace TheJourneyGame
     /// stopniu w enemy; Dodanie kierunku w którym zwrócony jest gracz; Dodanie w klasie Sword 
     /// sprawdzania czy przeciwnik znajduje się w odpowiednim kierunku wzgledem gracza; 
     /// Dodanie sprawdzenia czy przeciwnik jest w zasiegu ataku; Nearby();
+    /// Grafika pomieszczenie, ekwipunek (wstepnie), Bat, Ulepszenie metody Bat.Move() i
+    /// Bat.TakeAHit(); Dodanie animacji uderzenia do Player i Bat; Dodanie Timera wyznaczajacego
+    /// czestotliwosc ataku potworow; Dalsza implementacja IFightable;
     /// 
     /// Do zrobienia: Klasa (Equipment i pochodne (Potiony), (Weapon i pochodne (bronie))); 
     /// Klasa Enemy i klasy pochodne; 
@@ -42,6 +44,7 @@ namespace TheJourneyGame
     /// Tworzenie kolejnych metod; interakcja miedzy obiektami; Bindowanie hp do paska ->
     /// -> Stack panel zamiast image; GRAFIKA, GUI; Ulepszanie poruszania się enemy;
     /// Atak i TakeAHit - rozwój w Player i Enemy(Obrona, uzycie broni, przeliczanie obrazen);
+    /// Zbilansowanie rozgrywki!
     /// </summary>
 
 
@@ -60,22 +63,20 @@ namespace TheJourneyGame
         {
             playArea.Children.Add(new Rectangle());
             actualPos.DataContext = GameController;
-            dg.ItemsSource = GameController.EnemiesList;
             
         }
         public void InitializeGame()
         {
-            GameController = new GameController(playArea);
-            weapon1.Source = new BitmapImage(new Uri(@"\image\sword100x100.png", UriKind.Relative));
-            weapon1.Visibility = Visibility.Hidden;
-            weapon1.IsEnabled = false;
+            GameController = new GameController(playArea, equipmentGrid);
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             Key keyPressed = e.Key;
             if (keyPressed == Key.A)
+            {
                 GameController.AttackEnemy();
+            }
             else
                 GameController.Move((Direction)keyPressed);
         }

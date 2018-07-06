@@ -105,16 +105,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="image\kwadrat.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="image\weapon.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="image\sword.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="image\sword100x100.png" />
+    <Resource Include="image\weapons\sword100x100.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="image\sword30x30.png" />
@@ -132,6 +126,12 @@
   <ItemGroup>
     <Resource Include="image\Player.png" />
     <Resource Include="image\PlayerHit.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\weapons\Bow.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\weapons\Mace.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

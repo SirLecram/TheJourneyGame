@@ -12,6 +12,7 @@ namespace TheJourneyGame.Model
     {
         public bool IsPickedUp { get; protected set; }
         public abstract string Name { get; protected set; }
+        public EquipmentType EqType { get; protected set; }
         public Equipment(Point point) : base(point, 0)
         {
             IsPickedUp = false;

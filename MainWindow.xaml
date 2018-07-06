@@ -38,13 +38,9 @@
         </Border>
         <Canvas Name="playArea" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" >
             <Canvas.Children>
-                <!--   <Image Name="playerImage" Source="kwadrat.png" 
-                       Canvas.Left="{Binding PlayerXPosition, Mode=OneWay}"
-                       Canvas.Bottom="{Binding PlayerYPosition, Mode=OneWay}"/> -->
             </Canvas.Children>
-
         </Canvas>
-        <Grid Grid.Column="1" Grid.Row="3" Margin="40, 15, 30, 15">
+        <Grid Grid.Column="1" Grid.Row="3" Margin="40, 15, 30, 15" Name="equipmentGrid">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
@@ -53,18 +49,9 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <Border Grid.ColumnSpan="5" BorderBrush="ForestGreen" BorderThickness="2" CornerRadius="3"/>
-            <Image Name="weapon1" />
-            <Image Name="weapon2" />
-            <Image Name="weapon3" />
-            <Image Name="potion1" />
-            <Image Name="potion2" />
         </Grid>
-        <DataGrid ItemsSource="{Binding EnemiesList}" Name="dg" Grid.Row="2" Grid.Column="2"
-                  Grid.ColumnSpan="2" HorizontalAlignment="Right"/>
         <Label Name="actualPos" Grid.Row="1" Grid.Column="2" Content="{Binding playerLocation, Mode=OneWay}"
                HorizontalAlignment="Right" Margin="8"/>
 
-        <!--    <Button Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" 
-                Content="Napis duza czcionka" FontSize="50"/> -->
     </Grid>
 </Window>

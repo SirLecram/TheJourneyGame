@@ -9,14 +9,15 @@ namespace TheJourneyGame.Model
 {
     class Sword : Weapon
     {
-        public const int Range = 20;
         private const int _attackDirections = 3;
         //public const int ReuseTime = 
 
         public Sword(Point point, string name, string imagePath, int damage) 
-            : base(point, name, imagePath, damage)
+            : base(point, name, imagePath, damage, 50)
         {
-
+            EqType = EquipmentType.Sword;
+            WeaponAppearance.ToolTip = "Attack Directions: " + _attackDirections.ToString() + ";\n" +
+                "Attack Range: " + Range.ToString() + ";\n" + "Damage: " + Damage.ToString() + ";";
         }
 
         public override bool UseWeapon(Point enemyLocation, Direction sightDirection)

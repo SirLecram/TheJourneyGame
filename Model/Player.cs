@@ -13,24 +13,42 @@ namespace TheJourneyGame.Model
 {
     class Player : Position, IFightable
     {
+        #region Private and protected attributes
         private Equipment _equippedItem;
         private List<Equipment> _equipmentList { get; set; }
-        public IEnumerable<Equipment> EquipmentList { get => _equipmentList; }
         private Direction _sightDirection { get; set; }
+        private int _actualAttackRange {
+            get
+            {
+                if (_equippedItem is Weapon)
+                    return (_equippedItem as Weapon).Range;
+                else
+                    return 30;
+            } }
+        private int _actualAttackPower
+        {
+            get
+            {
+                if (_equippedItem is Weapon)
+                    return (_equippedItem as Weapon).Damage;
+                else
+                    return 4;
+            }
+        }
         private BitmapImage _playerImage = new BitmapImage(new Uri(@"\image\Player.png", UriKind.Relative));
         private BitmapImage _playerHitImage = new BitmapImage(new Uri(@"\image\PlayerHit.png", 
             UriKind.Relative));
         private DispatcherTimer animationTimer = new DispatcherTimer();
+        #endregion
 
         public int HitPoints { get; private set; }
         public Image PlayersAppearance { get; private set; }
         public bool IsDead { get { if (HitPoints <= 0) return true; else return false; } }
+        public IEnumerable<Equipment> EquipmentList { get => _equipmentList; }
 
         public Player(Point point, int amountOfHP) : base(point, 10)
         {
             InitializePlayer(amountOfHP);
-            _equippedItem = new Sword(new Point(0, 0), "Miecz", @"\image\sword100x100.png", 3);
-            _equipmentList.Add(_equippedItem);
         }
         #region Initialization and help methods
         private void InitializePlayer(int amountOfHP)
@@ -41,7 +59,7 @@ namespace TheJourneyGame.Model
             PlayersAppearance.Source = _playerImage;
             HitPoints = amountOfHP;
             _sightDirection = Direction.Left;
-            animationTimer.Interval = new TimeSpan(TimeSpan.FromMilliseconds(750).Ticks);
+            animationTimer.Interval = new TimeSpan(TimeSpan.FromMilliseconds(800).Ticks);
             animationTimer.Tick += AnimationTimer_Tick;
             animationTimer.Start();
         }
@@ -75,6 +93,15 @@ namespace TheJourneyGame.Model
         public void Equip(Equipment itemToEquip)
         {
             _equipmentList.Add(itemToEquip);
+
+        }
+        public void SelectToUse(EquipmentType eqToSelect)
+        {
+            Equipment selectedItem = _equipmentList.Find(Equipment => Equipment.EqType == eqToSelect);
+            if (selectedItem != null)
+            {
+                _equippedItem = selectedItem;
+            }
         }
         /// <summary>
         /// A method which provide a way to attack selected enemy
@@ -83,10 +110,16 @@ namespace TheJourneyGame.Model
         public void Attack(IFightable enemyToAttack)
         {
             Enemy enemy = (Enemy)enemyToAttack;
-            if (Nearby(enemy.Location, 50))
+            int minDamage = Math.Abs(_actualAttackPower - 5);
+            int maxDamage = _actualAttackPower + 1;
+            if (Nearby(enemy.Location, _actualAttackRange) && _equippedItem is Weapon)
             {
-                if (((Weapon)_equippedItem).UseWeapon(enemy.Location, _sightDirection))
-                    enemyToAttack.TakeAHit(5);
+                if ((_equippedItem as Weapon).UseWeapon(enemy.Location, _sightDirection))
+                    enemyToAttack.TakeAHit(random.Next(minDamage, maxDamage));
+            }
+            else if(Nearby(enemy.Location, _actualAttackRange))
+            {
+                enemyToAttack.TakeAHit(random.Next(maxDamage));
             }
         }
         /// <summary>
@@ -98,8 +131,6 @@ namespace TheJourneyGame.Model
         {
             base.Move(direction, playArea);
             _sightDirection = direction;
-            // W TYM MIEJSCU DOPISAC:
-            // ################# WARUNKI PODNOSZENIA PRZEDMIOTOW  #####################
         }
         #endregion
     }

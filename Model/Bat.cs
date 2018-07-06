@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -20,25 +22,30 @@ namespace TheJourneyGame.Model
         private BitmapImage _batHitImage = new BitmapImage(new Uri(@"\image\BatHited.png",
             UriKind.Relative));
 
+        public string Name { get; }
 
-        public Bat(Point point, Canvas playArea, int hp) 
-            : base(point, _batMoveInterval, _batMovingTimeSpan, playArea, hp, _batImagePath)
+        public Bat(Point point, Canvas playArea, int hp, int maxAttackPower) 
+            : base(point, _batMoveInterval, _batMovingTimeSpan, playArea, hp, _batImagePath, maxAttackPower)
         {
             _attackRange = 30;
+            Name = "Bat";
+            _enemyAppearance.ToolTip = Name;
         }
 
         public override void Attack(IFightable atackDestination)
         {
             if (Nearby(_playerPosition, _attackRange))
-                atackDestination.TakeAHit(3);
+                atackDestination.TakeAHit(random.Next(_maxAttackPower+1));
+            
+            
         }
 
         public override void Move(Direction direction, Canvas playArea)
         {
             base.Move(direction, playArea);
-            if (EnemyAppearance.Source != _batImage)
+            if (_enemyAppearance.Source != _batImage)
             {
-                EnemyAppearance.Source = _batImage;
+                _enemyAppearance.Source = _batImage;
             }
             
         }
@@ -46,7 +53,8 @@ namespace TheJourneyGame.Model
         public override bool TakeAHit(int hp)
         {
             bool died = base.TakeAHit(hp);
-            EnemyAppearance.Source = _batHitImage;
+            _enemyAppearance.Source = _batHitImage;
+            
             return died;
         }
     }

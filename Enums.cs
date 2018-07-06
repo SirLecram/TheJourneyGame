@@ -7,6 +7,14 @@
         Right = 25,
         Down = 26,
     }
+    public enum EquipmentType
+    {
+        Sword = 0,
+        Bow,
+        Mace,
+        RedPotion,
+        BluePotion,
+    }
     public interface IFightable
     {
         void Attack(IFightable atackDestination);

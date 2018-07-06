@@ -14,15 +14,23 @@ namespace TheJourneyGame.Model
         public Image WeaponAppearance { get; private set; }
         public override string Name { get; protected set; }
         public int Damage { get; }
-        public Weapon(Point point, string name, string imagePath, int damage) : base(point)
+        public int Range { get; }
+        public Weapon(Point point, string name, string imagePath, int damage, int range) : base(point)
         {
             Name = name;
             WeaponAppearance = new Image();
             WeaponAppearance.Height = WeaponAppearance.Width = 30;
             WeaponAppearance.Source = new BitmapImage(new Uri(imagePath, UriKind.Relative));
             Damage = damage;
+            Range = range;
         }
-
+        /// <summary>
+        /// Checks if the enemy is in the right direction (diffrent weapons has diffrent atack
+        /// directions).
+        /// </summary>
+        /// <param name="point">Position of enemy</param>
+        /// <param name="sightDirection">Direction the player is facing</param>
+        /// <returns></returns>
         public abstract bool UseWeapon(Point point, Direction sightDirection);
 
         public override void Move(Direction direction, Canvas playArea)

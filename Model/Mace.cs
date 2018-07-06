@@ -9,17 +9,19 @@ namespace TheJourneyGame.Model
 {
     class Mace : Weapon
     {
-        public const int Range = 15;
         private const int _attackDirections = 4;
 
         public Mace(Point point, string name, string imagePath, int damage) 
-            : base(point, name, imagePath, damage)
+            : base(point, name, imagePath, damage, 50)
         {
+            EqType = EquipmentType.Mace;
+            WeaponAppearance.ToolTip = "Attack Directions: " + _attackDirections.ToString() + ";\n" +
+                "Attack Range: " + Range.ToString() + ";\n" + "Damage: " + Damage.ToString() + ";";
         }
 
         public override bool UseWeapon(Point point, Direction sightDirection)
         {
-            throw new NotImplementedException();
+            return true;
         }
     }
 }
