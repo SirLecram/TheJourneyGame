@@ -11,10 +11,9 @@ namespace TheJourneyGame.Model
     {
         private const int _attackDirections = 4;
 
-        public Mace(Point point, string name, string imagePath, int damage) 
-            : base(point, name, imagePath, damage, 50)
+        public Mace(Point point, string name, int damage) 
+            : base(point, name, damage, 50, EquipmentType.Mace)
         {
-            EqType = EquipmentType.Mace;
             WeaponAppearance.ToolTip = "Attack Directions: " + _attackDirections.ToString() + ";\n" +
                 "Attack Range: " + Range.ToString() + ";\n" + "Damage: " + Damage.ToString() + ";";
         }

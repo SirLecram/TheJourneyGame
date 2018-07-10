@@ -12,10 +12,9 @@ namespace TheJourneyGame.Model
         private const int _attackDirections = 3;
         //public const int ReuseTime = 
 
-        public Sword(Point point, string name, string imagePath, int damage) 
-            : base(point, name, imagePath, damage, 50)
+        public Sword(Point point, string name, int damage) 
+            : base(point, name, damage, 50, EquipmentType.Sword)
         {
-            EqType = EquipmentType.Sword;
             WeaponAppearance.ToolTip = "Attack Directions: " + _attackDirections.ToString() + ";\n" +
                 "Attack Range: " + Range.ToString() + ";\n" + "Damage: " + Damage.ToString() + ";";
         }

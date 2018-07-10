@@ -15,10 +15,8 @@ namespace TheJourneyGame.Model
         protected Point location { get; set; }
         public Point Location { get => location; }
         protected static Random random = new Random();
-       /* private static Canvas _playArea { get; }
-        protected static IEnumerable PlayAreaChildren { get => _playArea.Children}*/
 
-        public Position(Point point, int moveInterval/*, Canvas playArea*/)
+        public Position(Point point, int moveInterval)
         {
             location = point;
             _moveInterval = moveInterval;

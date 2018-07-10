@@ -77,6 +77,7 @@
     <Compile Include="Model\Mace.cs" />
     <Compile Include="Model\Player.cs" />
     <Compile Include="Model\Position.cs" />
+    <Compile Include="Model\Potion.cs" />
     <Compile Include="Model\Sword.cs" />
     <Compile Include="Model\Weapon.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -132,6 +133,10 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="image\weapons\Mace.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\BluePotion.png" />
+    <Resource Include="image\RedPotion.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

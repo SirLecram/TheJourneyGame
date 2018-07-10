@@ -17,10 +17,11 @@ namespace TheJourneyGame.Model
         private Equipment _equippedItem;
         private List<Equipment> _equipmentList { get; set; }
         private Direction _sightDirection { get; set; }
+        private int _maxHp { get; set; }
         private int _actualAttackRange {
             get
             {
-                if (_equippedItem is Weapon)
+                if(_equippedItem is Weapon)
                     return (_equippedItem as Weapon).Range;
                 else
                     return 30;
@@ -58,6 +59,7 @@ namespace TheJourneyGame.Model
             PlayersAppearance.Height = PlayersAppearance.Width = 30;
             PlayersAppearance.Source = _playerImage;
             HitPoints = amountOfHP;
+            _maxHp = amountOfHP;
             _sightDirection = Direction.Left;
             animationTimer.Interval = new TimeSpan(TimeSpan.FromMilliseconds(800).Ticks);
             animationTimer.Tick += AnimationTimer_Tick;
@@ -88,12 +90,15 @@ namespace TheJourneyGame.Model
         }
         public void IncreaseHp(int numberOfHP)
         {
-
+            if (HitPoints + numberOfHP >= _maxHp)
+                HitPoints = _maxHp;
+            else
+                HitPoints += numberOfHP;
         }
         public void Equip(Equipment itemToEquip)
         {
             _equipmentList.Add(itemToEquip);
-
+            itemToEquip.PickUp();
         }
         public void SelectToUse(EquipmentType eqToSelect)
         {
@@ -102,6 +107,13 @@ namespace TheJourneyGame.Model
             {
                 _equippedItem = selectedItem;
             }
+            
+        }
+        public void UsePotion(EquipmentType potionType)
+        {
+            Potion selectedPotion =(Potion) _equipmentList.Find(Equipment => Equipment.EqType == potionType);
+            IncreaseHp(selectedPotion.UsePotion());
+            _equipmentList.Remove(selectedPotion);
         }
         /// <summary>
         /// A method which provide a way to attack selected enemy

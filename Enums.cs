@@ -12,8 +12,8 @@
         Sword = 0,
         Bow,
         Mace,
-        RedPotion,
         BluePotion,
+        RedPotion,
     }
     public interface IFightable
     {

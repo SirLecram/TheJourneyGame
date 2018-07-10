@@ -15,7 +15,7 @@ namespace TheJourneyGame.Model
     class Bat : Enemy
     {
         private const int _batMoveInterval = 5;
-        private const long _batMovingTimeSpan = 10000000;
+        private const long _batMovingTimeSpan = 800000;
         private const string _batImagePath = @"\image\BatEnemy.png";
         private BitmapImage _batImage = new BitmapImage(new Uri(@"\image\BatEnemy.png",
             UriKind.Relative));
@@ -27,7 +27,7 @@ namespace TheJourneyGame.Model
         public Bat(Point point, Canvas playArea, int hp, int maxAttackPower) 
             : base(point, _batMoveInterval, _batMovingTimeSpan, playArea, hp, _batImagePath, maxAttackPower)
         {
-            _attackRange = 30;
+            _attackRange = 50;
             Name = "Bat";
             _enemyAppearance.ToolTip = Name;
         }

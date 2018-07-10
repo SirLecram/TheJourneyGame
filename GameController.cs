@@ -18,17 +18,29 @@ namespace TheJourneyGame
     class GameController : INotifyPropertyChanged
     {
         public List<Weapon> WeaponsInRoom { get; private set; }
+        public List<Equipment> EquipmentInRoom { get; private set; }
+        public static IReadOnlyDictionary<EquipmentType, string> EqImagePathDictionary
+        {
+            get => _equipmentImagePathDictionary;
+        }
         private static Player _player { get; set; }
         public static Point PlayerLocation { get => _player.Location; }
         public int PlayerHitPoints { get => _player.HitPoints; }
         private Canvas _playArea { get; }
         private List<Enemy> _enemiesList { get; set; }
-        public IEnumerable<Enemy> EnemiesList { get => _enemiesList; }
-        //public IEnumerable<Equipment> EquipmentList { get => _player.EquipmentList; }
+        private int _level { get; set; }
         public Point playerLocation { get => location(); }
         private DispatcherTimer playerAttackTimer = new DispatcherTimer();
-        private Dictionary<EquipmentType, Image> _equipmentImageDictionary = new Dictionary<EquipmentType, Image>();
+        private DispatcherTimer levelTimer = new DispatcherTimer();
+        private Dictionary<EquipmentType, Image> _equipmentImageDictionary = 
+            new Dictionary<EquipmentType, Image>();
+        private static Dictionary<EquipmentType, string> _equipmentImagePathDictionary { get; set; }
         private Grid _equipmentGrid { get; }
+        private int _levelBatAmount;
+        private List<EquipmentType> _levelWeapons;
+        private int _levelPotionChancePer100;
+        private TimeSpan _levelTimeIntervalStep;
+        public Random random = new Random();
 
 
         public double PlayerXPosition { get => _player.Location.X; }
@@ -38,34 +50,24 @@ namespace TheJourneyGame
         {
             _playArea = playArea;
             _equipmentGrid = eqGrid;
+            _level = 1;
             InitializeGameAndTimers();
-            InitializePlayerPositionBinding();
-
-            Weapon wp = new Sword(new Point(250, 200), "Miecz", @"\image\weapons\sword100x100.png", 10);
-            WeaponsInRoom.Add(wp);
-            _playArea.Children.Add(wp.WeaponAppearance);
-            Canvas.SetLeft(wp.WeaponAppearance, wp.Location.X);
-            Canvas.SetBottom(wp.WeaponAppearance, wp.Location.Y);
-            Weapon wp2 = new Bow(new Point(400, 200), "Łuk", @"\image\weapons\Bow.png", 10);
-            WeaponsInRoom.Add(wp2);
-            _playArea.Children.Add(wp2.WeaponAppearance);
-            Canvas.SetLeft(wp2.WeaponAppearance, wp2.Location.X);
-            Canvas.SetBottom(wp2.WeaponAppearance, wp2.Location.Y);
-            Weapon wp3 = new Mace(new Point(400, 300), "Buława", @"\image\weapons\Mace.png", 10);
-            WeaponsInRoom.Add(wp3);
-            _playArea.Children.Add(wp3.WeaponAppearance);
-            Canvas.SetLeft(wp3.WeaponAppearance, wp3.Location.X);
-            Canvas.SetBottom(wp3.WeaponAppearance, wp3.Location.Y);
             InitializeEquipmentImages();
+            InitializeLevel(_level);
+
 
         }
         public Point location()
         {
             return _player.Location;
         }
-        #region Initialization & help methods
+        #region Initialization
         private void InitializePlayerPositionBinding()
         {
+            _player = new Player(new Point(250, 20), 50);
+            _playArea.Children.Add(_player.PlayersAppearance);
+            Canvas.SetLeft(_player.PlayersAppearance, _player.Location.X);
+            Canvas.SetBottom(_player.PlayersAppearance, _player.Location.Y); 
             Binding bindingX = new Binding();
             Binding bindingY = new Binding();
             bindingX.Source = this;
@@ -81,28 +83,81 @@ namespace TheJourneyGame
         private void InitializeGameAndTimers()
         {
             WeaponsInRoom = new List<Weapon>();
-            InitializeEnemies();
-             /*_playArea.Children.Add(_enemiesList[0].EnemyAppearance);
-             _playArea.Children.Add(_enemiesList[1].EnemyAppearance);
-             Canvas.SetLeft(_enemiesList[0].EnemyAppearance, _enemiesList[0].Location.X);
-             Canvas.SetBottom(_enemiesList[0].EnemyAppearance, _enemiesList[0].Location.Y);
-             Canvas.SetLeft(_enemiesList[1].EnemyAppearance, _enemiesList[1].Location.X);
-             Canvas.SetBottom(_enemiesList[1].EnemyAppearance, _enemiesList[1].Location.Y);*/
+            EquipmentInRoom = new List<Equipment>();
+            _equipmentImagePathDictionary = new Dictionary<EquipmentType, string>();
             playerAttackTimer.Interval = new TimeSpan(TimeSpan.FromMilliseconds(2000).Ticks);
             playerAttackTimer.Tick += PlayerAttackTimer_Tick;
-            playerAttackTimer.Start();
-            _player = new Player(new Point(250, 20), 10);
+            levelTimer.Interval = new TimeSpan(TimeSpan.FromMilliseconds(3000).Ticks);
+            levelTimer.Tick += LevelTimer_Tick;
+           // playerAttackTimer.Start();
+           /* _player = new Player(new Point(250, 20), 50);
             _playArea.Children.Add(_player.PlayersAppearance);
             Canvas.SetLeft(_player.PlayersAppearance, _player.Location.X);
-            Canvas.SetBottom(_player.PlayersAppearance, _player.Location.Y);
+            Canvas.SetBottom(_player.PlayersAppearance, _player.Location.Y);*/
 
         }
+        private void InitializeLevel(int levelNumber)
+        {
+            switch(levelNumber)
+            {
+                case 1:
+                    InitializePlayerPositionBinding();
+                    SpawnEquipment(EquipmentType.BluePotion, new Point(700, 200));
+                    SpawnEquipment(EquipmentType.Sword, new Point(100, 50));
+                    InitializeEnemies();
+                    _levelBatAmount = 10;
+                    _levelPotionChancePer100 = 15;
+                    _levelTimeIntervalStep = new TimeSpan(TimeSpan.FromMilliseconds(20).Ticks);
+                    playerAttackTimer.Start();
+                    levelTimer.Start();
+                    break;
+            }
+        }
+
+        private void LevelTimer_Tick(object sender, EventArgs e)
+        {
+            if(_levelBatAmount > 0)
+            {
+                Bat enemyToAdd = new Bat(GetRandomLocation(), _playArea, 30, 4);
+                _enemiesList.Add(enemyToAdd);
+                _playArea.Children.Add(enemyToAdd.EnemyStackPanel);
+                Canvas.SetLeft(enemyToAdd.EnemyStackPanel, enemyToAdd.Location.X);
+                Canvas.SetBottom(enemyToAdd.EnemyStackPanel, enemyToAdd.Location.Y);
+                _levelBatAmount--;
+            }
+            else
+            {
+                levelTimer.Stop();
+            }
+            if(!CheckThatPlayerHaveEquipment(EquipmentType.BluePotion))
+            {
+                int potionSpawn = random.Next(100);
+                if (potionSpawn <= 5)
+                    SpawnEquipment(EquipmentType.BluePotion);
+            }
+            levelTimer.Interval -= _levelTimeIntervalStep;
+            if (levelTimer.Interval <= _levelTimeIntervalStep)
+            {
+                levelTimer.Stop();
+                MessageBox.Show("Level Timer Stop");
+            }
+                
+
+        }
+
         private void InitializeEnemies()
         {
             _enemiesList = new List<Enemy>();
             _enemiesList.Add(new Bat(new Point(140, 140), _playArea, 20, 3));
             _enemiesList.Add(new Bat(new Point(300, 150), _playArea, 30, 3));
-            foreach(Enemy enemy in _enemiesList)
+            _enemiesList.Add(new Bat(new Point(150, 140), _playArea, 20, 3));
+            _enemiesList.Add(new Bat(new Point(320, 150), _playArea, 30, 3));
+            _enemiesList.Add(new Bat(new Point(200, 140), _playArea, 20, 3));
+           /* _enemiesList.Add(new Bat(new Point(220, 150), _playArea, 30, 3));
+            _enemiesList.Add(new Bat(new Point(352, 140), _playArea, 20, 3));
+            _enemiesList.Add(new Bat(new Point(100, 150), _playArea, 30, 3));*/
+
+            foreach (Enemy enemy in _enemiesList)
             {
                 _playArea.Children.Add(enemy.EnemyStackPanel);
                 Canvas.SetLeft(enemy.EnemyStackPanel, enemy.Location.X);
@@ -112,34 +167,41 @@ namespace TheJourneyGame
 
         public void InitializeEquipmentImages()
         {
-            List<string> imageSource = new List<string>()
-            {
-                @"\image\weapons\sword100x100.png",
-                @"\image\weapons\Bow.png",
-                @"\image\weapons\Mace.png",
-                @"\image\\weapons\Bow.png",
-                @"\image\weapons\Bow.png",
-            };
+            _equipmentImagePathDictionary = new Dictionary<EquipmentType, string>();
+            _equipmentImagePathDictionary.Add(EquipmentType.Sword, @"\image\weapons\sword100x100.png");
+            _equipmentImagePathDictionary.Add(EquipmentType.Bow, @"\image\weapons\Bow.png");
+            _equipmentImagePathDictionary.Add(EquipmentType.Mace, @"\image\weapons\Mace.png");
+            _equipmentImagePathDictionary.Add(EquipmentType.BluePotion, @"\image\BluePotion.png");
+            _equipmentImagePathDictionary.Add(EquipmentType.RedPotion, @"\image\RedPotion.png");
+
             for(int i = 0; i<5; i++)
             {
+                string imagePath = _equipmentImagePathDictionary[(EquipmentType)i];
                 Image newImage = new Image();
-                newImage.Source = new BitmapImage(new Uri(imageSource[i], UriKind.Relative));
+                newImage.Source = new BitmapImage(new Uri(imagePath, UriKind.Relative));
                 _equipmentImageDictionary.Add((EquipmentType)i, newImage);
                 _equipmentGrid.Children.Add(newImage);
                 Grid.SetColumn(newImage, i);
                 newImage.Visibility = Visibility.Hidden;
-                newImage.MouseDown += NewImage_MouseDown;
                 newImage.Cursor = Cursors.Hand;
-                if(i<WeaponsInRoom.Count)
+                if (i < 3)
                 {
-                    newImage.ToolTip = WeaponsInRoom.
-                    Find(weapon => weapon.EqType == (EquipmentType)i).WeaponAppearance.ToolTip;
+                    newImage.MouseDown += NewImage_MouseDown;
                 }
-                
             }
-
         }
+        private void AddToolTipsToGui(Equipment equipmentCollected)
+        {
+            if(equipmentCollected is Weapon)
+                _equipmentImageDictionary[equipmentCollected.EqType].ToolTip =
+                (equipmentCollected as Weapon).WeaponAppearance.ToolTip;
+            else if(equipmentCollected is Equipment)
+                _equipmentImageDictionary[equipmentCollected.EqType].ToolTip =
+                (equipmentCollected as Potion).EquipmentAppearance.ToolTip;
+        }
+        #endregion
 
+        #region Events
         private void NewImage_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             Image imgToFind = (Image)sender;
@@ -147,15 +209,17 @@ namespace TheJourneyGame
             int indexOfKey = _equipmentImageDictionary.Values.ToList().IndexOf(imgToFind);
             EquipmentType selectedEqType = _equipmentImageDictionary.Keys.ToList()[indexOfKey];
             _player.SelectToUse(selectedEqType);
+            SpawnEquipment(EquipmentType.RedPotion);
 
         }
 
         private void PlayerAttackTimer_Tick(object sender, EventArgs e)
         {
-            foreach (Enemy enemy in EnemiesList)
+            foreach (Enemy enemy in _enemiesList)
             {
                 enemy.Attack(_player);
             }
+            OnPropertyChanged("PlayerHitPoints");
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -165,7 +229,120 @@ namespace TheJourneyGame
             if (propertyChanged != null)
                 propertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
-        
+        #endregion
+
+        #region Help Methods
+        private Point GetRandomLocation()
+        {
+            double x = random.Next((int)_playArea.ActualWidth - 10);
+            double y = random.Next((int)_playArea.ActualHeight - 10);
+            return new Point(x, y);
+        }
+        /// <summary>
+        /// Spawns new Equipment on Game Area. Beware! You can't spawn equipment if it 
+        /// already exist in the player inventory.
+        /// </summary>
+        /// <param name="eqType"></param>
+        /// <param name="location"></param>
+        private void SpawnEquipment(EquipmentType eqType, Point location)
+        {
+            Equipment newItem = null;
+            if (!CheckThatPlayerHaveEquipment(eqType))
+            {
+                switch (eqType)
+                {
+                    case EquipmentType.Sword:
+                        newItem = new Sword(location, "Miecz", 10);
+                        break;
+                    case EquipmentType.Bow:
+                        newItem = new Bow(location, "Łuk", 5);
+                        break;
+                    case EquipmentType.Mace:
+                        newItem = new Mace(location, "Buława", 12);
+                        break;
+                    case EquipmentType.BluePotion:
+                        newItem = new Potion(location, "Niebieska mikstura", 12, eqType);
+                        break;
+                    case EquipmentType.RedPotion:
+                        newItem = new Potion(location, "Czerwona mikstura", 20, eqType);
+                        break;
+                }
+
+                if (newItem is Weapon)
+                {
+                    Weapon weapon = newItem as Weapon;
+                    WeaponsInRoom.Add(weapon);
+                    _playArea.Children.Add(weapon.WeaponAppearance);
+                    Canvas.SetLeft(weapon.WeaponAppearance, weapon.Location.X);
+                    Canvas.SetBottom(weapon.WeaponAppearance, weapon.Location.Y);
+                }
+                else
+                {
+                    Potion potion = newItem as Potion;
+                    EquipmentInRoom.Add(newItem);
+                    _playArea.Children.Add(potion.EquipmentAppearance);
+                    Canvas.SetLeft(potion.EquipmentAppearance, potion.Location.X);
+                    Canvas.SetBottom(potion.EquipmentAppearance, potion.Location.Y);
+                }
+            }
+            else
+                throw new Exception("Nie można utowrzyć przedmiotu, ponieważ znajduje się on już w Eq gracza.");
+        }
+        /// <summary>
+        /// Spawns new Equipment on Game Area. You can use this version of SpawnEquipment() 
+        /// only after initialization of Game Area. Beware! You can't spawn equipment if it 
+        /// already exist in the player inventory.
+        /// </summary>
+        /// <param name="eqType"></param>
+        private void SpawnEquipment(EquipmentType eqType)
+        {
+            Equipment newItem = null;
+            if (!CheckThatPlayerHaveEquipment(eqType))
+            {
+                switch (eqType)
+                {
+                    case EquipmentType.Sword:
+                        newItem = new Sword(GetRandomLocation(), "Miecz", 10);
+                        break;
+                    case EquipmentType.Bow:
+                        newItem = new Bow(GetRandomLocation(), "Łuk", 5);
+                        break;
+                    case EquipmentType.Mace:
+                        newItem = new Mace(GetRandomLocation(), "Buława", 12);
+                        break;
+                    case EquipmentType.BluePotion:
+                        newItem = new Potion(GetRandomLocation(), "Niebieska mikstura", 12, eqType);
+                        break;
+                    case EquipmentType.RedPotion:
+                        newItem = new Potion(GetRandomLocation(), "Czerwona mikstura", 20, eqType);
+                        break;
+                }
+                if (newItem is Weapon)
+                {
+                    Weapon weapon = newItem as Weapon;
+                    WeaponsInRoom.Add(weapon);
+                    _playArea.Children.Add(weapon.WeaponAppearance);
+                    Canvas.SetLeft(weapon.WeaponAppearance, weapon.Location.X);
+                    Canvas.SetBottom(weapon.WeaponAppearance, weapon.Location.Y);
+                }
+                else
+                {
+                    Potion potion = newItem as Potion;
+                    EquipmentInRoom.Add(newItem);
+                    _playArea.Children.Add(potion.EquipmentAppearance);
+                    Canvas.SetLeft(potion.EquipmentAppearance, potion.Location.X);
+                    Canvas.SetBottom(potion.EquipmentAppearance, potion.Location.Y);
+                }
+            }
+            else
+                throw new Exception("Nie można utowrzyć przedmiotu, ponieważ znajduje się on już w Eq gracza.");
+        }
+        private bool CheckThatPlayerHaveEquipment(EquipmentType eqType)
+        {
+            if (_player.EquipmentList.ToList().Exists(eq => eq.EqType == eqType)) return true;
+            else return false;
+
+        }
         #endregion
 
         #region Game mechanics
@@ -201,20 +378,41 @@ namespace TheJourneyGame
         /// </summary>
         public void PickUpEquipment()
         {
-            bool isLocationTheSame = false;
-            foreach (Weapon weapon in WeaponsInRoom)
+            List<Equipment> allEquipmentList = new List<Equipment>();
+                allEquipmentList.AddRange(WeaponsInRoom);
+                allEquipmentList.AddRange(EquipmentInRoom);
+            foreach (Equipment equipment in allEquipmentList)
             {
-                if (playerLocation == weapon.Location)
+                double maxPositionDiffrence = 7;
+                if (maxPositionDiffrence > Math.Abs(equipment.Location.X - PlayerLocation.X)
+                    && maxPositionDiffrence > Math.Abs(equipment.Location.Y - PlayerLocation.Y))
                 {
-                    isLocationTheSame = true;
-                    _player.Equip(weapon);
-                    _playArea.Children.Remove(weapon.WeaponAppearance);
-                    _equipmentImageDictionary[weapon.EqType].Visibility = Visibility.Visible;
+                    _player.Equip(equipment);
+                    _equipmentImageDictionary[equipment.EqType].Visibility = Visibility.Visible;
+                    if(equipment is Weapon)
+                    {
+                        
+                        _playArea.Children.Remove((equipment as Weapon).WeaponAppearance);
+                        WeaponsInRoom.Remove(equipment as Weapon);
+                    }
+                    else
+                    {
+                        _playArea.Children.Remove((equipment as Potion).EquipmentAppearance);
+                        EquipmentInRoom.Remove(equipment);
+                    }
+                    AddToolTipsToGui(equipment);
+                       
                 }
             }
-            if(isLocationTheSame)
-                WeaponsInRoom.Remove((Weapon)_player.EquipmentList.ToList().Last());
-            
+        }
+        public void UsePotion(EquipmentType potionType)
+        {
+            if(_equipmentImageDictionary[potionType].IsVisible)
+            {
+                _equipmentImageDictionary[potionType].Visibility = Visibility.Hidden;
+                _player.UsePotion(potionType);
+            }
+            OnPropertyChanged("PlayerHitPoints");
         }
         #endregion
 

@@ -15,9 +15,10 @@ namespace TheJourneyGame.Model
         public override string Name { get; protected set; }
         public int Damage { get; }
         public int Range { get; }
-        public Weapon(Point point, string name, string imagePath, int damage, int range) : base(point)
+        public Weapon(Point point, string name, int damage, int range,
+            EquipmentType eqType) : base(point, eqType, name)
         {
-            Name = name;
+            string imagePath = GameController.EqImagePathDictionary[EqType];
             WeaponAppearance = new Image();
             WeaponAppearance.Height = WeaponAppearance.Width = 30;
             WeaponAppearance.Source = new BitmapImage(new Uri(imagePath, UriKind.Relative));

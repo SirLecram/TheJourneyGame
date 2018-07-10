@@ -8,6 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("image/mace.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("image/bluepotion.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("image/redpotion.png")]
 
 
