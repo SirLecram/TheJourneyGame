@@ -18,7 +18,7 @@ namespace TheJourneyGame.Model
         protected int _maxAttackPower { get; set; }
         public int HitPoints { get; protected set; }
         public bool IsDead { get { if (HitPoints <= 0) return true; else return false; } }
-        public static DispatcherTimer timer = new DispatcherTimer();
+        public static DispatcherTimer Timer = new DispatcherTimer();
         protected Canvas _playArea { get; }
         protected Point _playerPosition { get => GameController.PlayerLocation; }
         protected Image _enemyAppearance { get; private set; }
@@ -52,9 +52,9 @@ namespace TheJourneyGame.Model
             bindingX.Path = new PropertyPath("HitPoints");
             bindingX.Mode = BindingMode.OneWay;
             enemyHpBar.SetBinding(ProgressBar.ValueProperty, bindingX);
-            timer.Interval = new TimeSpan(movingTimeSpan);
-            timer.Tick += Timer_Tick;
-            timer.Start();
+            Timer.Interval = new TimeSpan(movingTimeSpan);
+            Timer.Tick += Timer_Tick;
+            Timer.Start();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

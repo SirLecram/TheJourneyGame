@@ -54,19 +54,22 @@
             <Label Name="actualPos"  Content="{Binding playerLocation, Mode=OneWay}" />
             <Label Name="actualHp" Content="{Binding PlayerHitPoints, Mode=OneWay}"/>
         </StackPanel>
-        <StackPanel Grid.Column="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" 
+        <StackPanel Grid.Column="1" Grid.ColumnSpan="2" HorizontalAlignment="Center"
                     VerticalAlignment="Center" Grid.Row="1" Name="mainMenuStackPanel" >
             <Label Name="headerLabel" Content="Witaj w TheJourney!" FontSize="40" 
                    HorizontalContentAlignment="Center"/>
             <Label Content="Main Menu" FontSize="20" HorizontalContentAlignment="Center"/>
             <Button Content="Rozpocznij nową przygodę!" Name="startNewGameButton" Margin="8"
-                    HorizontalAlignment="Center" FontSize="15" Width="200" Height="30"/>
+                    HorizontalAlignment="Center" FontSize="15" Width="200" Height="30" Click="StartNewGameButton_Click"/>
             <Button Content="Wczytaj przygodę!" Name="loadGameButton" Margin="8"
                     HorizontalAlignment="Center" FontSize="15" Width="200" Height="30"/>
             <Button Content="Wyjdź!" Name="exitButton" Margin="8"
                     HorizontalAlignment="Center" FontSize="15" Width="200" Height="30"/>
             
         </StackPanel>
+        <Label Content="3" Name="countDownTimer" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+               FontSize="80" HorizontalAlignment="Center" VerticalAlignment="Center" 
+               Foreground="#FFCF2323" Visibility="Hidden"/>
 
     </Grid>
 </Window>

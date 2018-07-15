@@ -13,18 +13,17 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace TheJourneyGame
 {
     /// <summary>
-    /// Ostatnio dodane: poruszanie (usprawnienie - zeby szly w kierunku gracza); 
-    /// Bindowanie HP; UStawienie mozliwosci ataku co pol sekundy; Dodano wstepnie potiony;
-    /// Dodano grafiki potionow; Dzialanie potionow ; Tworzenie przedmiotow w grze - dwie przeciazone metody;
-    /// Dodano tolerancje odleglosci gracz : podnoszony przedmiot; Podstawy renderowania poziomów;
-    /// Timer ze zdarzeniami z danych poziomow; Poprawiona czytelnosc kodu;
+    /// Ostatnio dodane:  Zaprogramowany przycisk Start Game; Odliczanie przed rozpoczeciem;
+    /// StartGame(); podstawy ResetGame(); Zapetlenie rozgrywki i MainMenu; Pseudo losowy spawn broni
+    /// charakterystycznej dla danego poziomu; 
     /// 
-    /// Do zrobienia niedługo: Enemy -> rodzaje, SpawnEnemy(); Poziomy Gry; Reset();
-    /// Obsluga przycisków Menu
+    /// Do zrobienia niedługo: Enemy -> rodzaje, SpawnEnemy(); Poziomy Gry;
+    /// Obsluga przycisków Menu; EXP i levelowanie;
     /// 
     /// Zrobione: Szkielet klasy GameController, (abstr) Position, Player; stworzone pole gry, 
     /// podstawowe dzialanie metody Move() (Equipment, zarys Player); Bindowanie pozycji gracza;
@@ -41,9 +40,14 @@ namespace TheJourneyGame
     /// Mozliwe wybieranie przedmiotu aktualnie uzywanego; Rozwój pozostalych klas pochodnych od weapon;
     /// Bow, Mace - dodano sprawdzanie kierunku i odleglosci; Dodano tooltips opisujace bronie; 
     /// Tooltips z opisami rowniez w ekwipunku GUI; Bindowanie HP Enemy do ProgressBar;
-    /// Zamiana EnemyApperiance na EnemyStackPanel; Dodano obrazenia wzgledem broni; Enum eqType
+    /// Zamiana EnemyApperiance na EnemyStackPanel; Dodano obrazenia wzgledem broni; Enum eqType;
+    /// poruszanie (usprawnienie - zeby szly w kierunku gracza); 
+    /// UStawienie mozliwosci ataku co pol sekundy; Dodano wstepnie potiony;
+    /// Dodano grafiki potionow; Dzialanie potionow ; Tworzenie przedmiotow w grze - dwie przeciazone metody;
+    /// Dodano tolerancje odleglosci gracz : podnoszony przedmiot; Podstawy renderowania poziomów;
+    /// Timer ze zdarzeniami z danych poziomow; Klasa (Potiony);
     /// 
-    /// Do zrobienia: Klasa (Potiony); Klasa Enemy i klasy pochodne;
+    /// Do zrobienia:  Klasa Enemy i klasy pochodne;
     /// od Enemy (potwory), dalsze usprawnianie metody Move(); Płynne poruszanie?; 
     /// GRAFIKA, GUI; Ulepszanie poruszania się enemy; EXP I LVL?; Punkty rankingowe;
     /// Atak i TakeAHit - rozwój w Player i Enemy(Obrona); POZIOMY!; Skille Specjalne;
@@ -55,6 +59,10 @@ namespace TheJourneyGame
     {
         GameController GameController;
         DateTime lastAttack;
+        DispatcherTimer countDownDTimer = new DispatcherTimer()
+        {
+            Interval = new TimeSpan(TimeSpan.FromSeconds(1).Ticks)
+        };
 
         public MainWindow()
         {
@@ -74,6 +82,7 @@ namespace TheJourneyGame
         {
             GameController = new GameController(playArea, equipmentGrid);
             lastAttack = DateTime.Now;
+            countDownDTimer.Tick += CountDownDTimer_Tick;
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -107,6 +116,38 @@ namespace TheJourneyGame
                     break;
             }
                 
+        }
+
+        private void StartNewGameButton_Click(object sender, RoutedEventArgs e)
+        {
+            mainMenuStackPanel.Visibility = Visibility.Hidden;
+            countDownTimer.Visibility = Visibility.Visible;
+            
+            countDownDTimer.Start(); // Game is starting ;
+            GameController.InitializeLevel();
+        }
+
+        private void CountDownDTimer_Tick(object sender, EventArgs e)
+        {
+            int seconds = int.Parse(countDownTimer.Content.ToString());
+            seconds--;
+            countDownTimer.Content = seconds.ToString();
+            if (seconds <= 0)
+            {
+                countDownDTimer.Stop();
+                GameController.StartGame();
+                countDownTimer.Visibility = Visibility.Hidden;
+                countDownTimer.Content = "3";
+            }
+        }
+       
+        public void GetMainMenu(bool wasGamePlayedBefore)
+        {
+            GameController.ResetGame();
+            if(wasGamePlayedBefore)
+                startNewGameButton.Content = "Kontynuuj przygodę!";
+            mainMenuStackPanel.Visibility = Visibility.Visible;
+
         }
     }
 }
