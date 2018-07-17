@@ -17,7 +17,9 @@ namespace TheJourneyGame.Model
         private Equipment _equippedItem;
         private List<Equipment> _equipmentList { get; set; }
         private Direction _sightDirection { get; set; }
+        private Dictionary<int, int> _experienceStages = new Dictionary<int, int>();
         private int _maxHp { get; set; }
+        private int _basicAttacPower { get; set; }
         private int _actualAttackRange {
             get
             {
@@ -31,9 +33,9 @@ namespace TheJourneyGame.Model
             get
             {
                 if (_equippedItem is Weapon)
-                    return (_equippedItem as Weapon).Damage;
+                    return (_equippedItem as Weapon).Damage + _basicAttacPower;
                 else
-                    return 4;
+                    return _basicAttacPower;
             }
         }
         private BitmapImage _playerImage = new BitmapImage(new Uri(@"\image\Player.png", UriKind.Relative));
@@ -43,13 +45,17 @@ namespace TheJourneyGame.Model
         #endregion
 
         public int HitPoints { get; private set; }
+        public int ExperiencePoints { get; private set; }
+        public int PlayerLevel { get; private set; }
         public Image PlayersAppearance { get; private set; }
+        public IReadOnlyDictionary<int, int > ExperienceStages { get => _experienceStages; }
         public bool IsDead { get { if (HitPoints <= 0) return true; else return false; } }
         public IEnumerable<Equipment> EquipmentList { get => _equipmentList; }
 
         public Player(Point point, int amountOfHP) : base(point, 10)
         {
             InitializePlayer(amountOfHP);
+            InitializeExperienceStages();
         }
         #region Initialization and help methods
         private void InitializePlayer(int amountOfHP)
@@ -60,12 +66,38 @@ namespace TheJourneyGame.Model
             PlayersAppearance.Source = _playerImage;
             HitPoints = amountOfHP;
             _maxHp = amountOfHP;
+            _basicAttacPower = 4;
+            PlayerLevel = 1;
             _sightDirection = Direction.Left;
             animationTimer.Interval = new TimeSpan(TimeSpan.FromMilliseconds(800).Ticks);
             animationTimer.Tick += AnimationTimer_Tick;
             animationTimer.Start();
         }
+        private void InitializeExperienceStages()
+        {
+            int initialExp = 100;
+            for(int i = 1; i<=11; i++)
+            {
+                if (i == 11)
+                    initialExp = 1000000;
+                _experienceStages.Add(i, initialExp);
+                initialExp *= 2;
+            }
 
+        }
+
+        public void LevelUp()
+        {
+            if(PlayerLevel<11)
+            {
+                PlayerLevel++;
+                _maxHp += 5;
+                _basicAttacPower++;
+                HitPoints = _maxHp;
+            }
+            
+            
+        }
         private void AnimationTimer_Tick(object sender, EventArgs e)
         {
             if (PlayersAppearance.Source != _playerImage)
@@ -115,6 +147,18 @@ namespace TheJourneyGame.Model
             IncreaseHp(selectedPotion.UsePotion());
             _equipmentList.Remove(selectedPotion);
         }
+        public void GainExp(int expToGain)
+        {
+            ExperiencePoints += expToGain;
+            if (ExperiencePoints > _experienceStages[PlayerLevel])
+                LevelUp();
+        }
+        public void RevivePlayer()
+        {
+            HitPoints = _maxHp;
+            location = new Point(900, 120);
+            
+        }
         /// <summary>
         /// A method which provide a way to attack selected enemy
         /// </summary>
@@ -122,16 +166,18 @@ namespace TheJourneyGame.Model
         public void Attack(IFightable enemyToAttack)
         {
             Enemy enemy = (Enemy)enemyToAttack;
-            int minDamage = Math.Abs(_actualAttackPower - 5);
+            int minDamage = Math.Abs(_actualAttackPower - _basicAttacPower);
             int maxDamage = _actualAttackPower + 1;
             if (Nearby(enemy.Location, _actualAttackRange) && _equippedItem is Weapon)
             {
                 if ((_equippedItem as Weapon).UseWeapon(enemy.Location, _sightDirection))
-                    enemyToAttack.TakeAHit(random.Next(minDamage, maxDamage));
+                    if (enemyToAttack.TakeAHit(random.Next(minDamage, maxDamage)))
+                        GainExp(enemy.ExpToGain);
             }
             else if(Nearby(enemy.Location, _actualAttackRange))
             {
-                enemyToAttack.TakeAHit(random.Next(maxDamage));
+                if (enemyToAttack.TakeAHit(random.Next(maxDamage)))
+                    GainExp(enemy.ExpToGain);
             }
         }
         /// <summary>

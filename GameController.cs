@@ -23,11 +23,33 @@ namespace TheJourneyGame
         {
             get => _equipmentImagePathDictionary;
         }
-        private static Player _player { get; set; }
-        private bool _isLevelFinished = false;
-        public static Point PlayerLocation { get => _player.Location; }
+
+        #region Binding Attributes
         public int PlayerHitPoints
         { get { if (_player != null) return _player.HitPoints; else return 0; } }
+        public int PlayerLevel
+        { get { if (_player != null) return _player.PlayerLevel; else return 0; } }
+        public string PlayerExperience
+        { get {
+                if (_player != null)
+                {
+                    string stringToReturn = _player.ExperiencePoints + "/" 
+                        + _player.ExperienceStages[PlayerLevel];
+                    return stringToReturn;
+                } 
+                else return String.Empty; } }
+        public int PlayerCompletedLevels
+        { get { if (_player != null) return _completedLevels; else return 0; } }
+        public static Point PlayerLocation { get => _player.Location; }
+        public double PlayerXPosition { get => _player.Location.X; }
+        public double PlayerYPosition { get => _player.Location.Y; }
+        #endregion
+
+        private static Player _player { get; set; }
+        private bool _isLevelFinished = false;
+        private int _completedLevels { get; set; }
+        
+        
         private Canvas _playArea { get; }
         private List<Enemy> _enemiesList { get; set; }
         private int _level { get; set; }
@@ -40,20 +62,21 @@ namespace TheJourneyGame
         private static Dictionary<EquipmentType, string> _equipmentImagePathDictionary { get; set; }
         private Grid _equipmentGrid { get; }
         private int _levelBatAmount;
+        private int _levelGhoulAmount;
         private List<EquipmentType> _levelWeapons;
         private int _levelPotionChancePer100;
         private TimeSpan _levelTimeIntervalStep;
         public Random random = new Random();
 
 
-        public double PlayerXPosition { get => _player.Location.X; }
-        public double PlayerYPosition { get => _player.Location.Y; }
+        
 
         public GameController(Canvas playArea, Grid eqGrid)
         {
             _playArea = playArea;
             _equipmentGrid = eqGrid;
             _level = 1;
+            _completedLevels = 1;
             _levelWeapons = new List<EquipmentType>();
             InitializePlayer();
             InitializeGameAndTimers();
@@ -96,41 +119,44 @@ namespace TheJourneyGame
             
             playerAttackTimer.Interval = new TimeSpan(TimeSpan.FromMilliseconds(2000).Ticks);
             playerAttackTimer.Tick += PlayerAttackTimer_Tick;
-            levelTimer.Interval = new TimeSpan(TimeSpan.FromMilliseconds(3000).Ticks);
+            levelTimer.Interval = new TimeSpan(TimeSpan.FromMilliseconds(4000).Ticks);
             levelTimer.Tick += LevelTimer_Tick;
 
         }
         private void InitializeLevel(int levelNumber)
         {
-            
-            switch(levelNumber)
+            InitializeEnemies();
+            switch (levelNumber)
             {
                 case 1:
                     InitializePlayerPositionBinding();
-                    if (!CheckThatPlayerHaveEquipment(EquipmentType.Sword))
-                        SpawnEquipment(EquipmentType.Sword/*, new Point(100, 50)*/);
-                    if (!CheckThatPlayerHaveEquipment(EquipmentType.BluePotion))
-                        SpawnEquipment(EquipmentType.BluePotion/*, new Point(700, 200)*/);
                     
-                    InitializeEnemies();
-                    _levelBatAmount = 4;
-                    _levelPotionChancePer100 = 15;
-                    _levelTimeIntervalStep = new TimeSpan(TimeSpan.FromMilliseconds(20).Ticks);
+                    SpawnEquipment(EquipmentType.BluePotion);
                     
+                    _levelBatAmount = 10;
+                    _levelPotionChancePer100 = 20;
+                    _levelTimeIntervalStep = new TimeSpan(TimeSpan.FromMilliseconds(100).Ticks);
+                    levelTimer.Interval = new TimeSpan(TimeSpan.FromSeconds(5).Ticks);
                     break;
                 case 2:
-                    _enemiesList.Add(new Bat(new Point(140, 140), _playArea, 20, 3));
-                    foreach (Enemy enemy in _enemiesList)
+                    SpawnEquipment(EquipmentType.BluePotion);
+                    SpawnEnemy(EnemyType.Bat, 3);
+                    _levelBatAmount = 15;
+                    _levelPotionChancePer100 = 15;
+                    levelTimer.Interval = new TimeSpan(TimeSpan.FromSeconds(4).Ticks);
+                    /*foreach (Enemy enemy in _enemiesList)
                     {
                         _playArea.Children.Add(enemy.EnemyStackPanel);
                         Canvas.SetLeft(enemy.EnemyStackPanel, enemy.Location.X);
                         Canvas.SetBottom(enemy.EnemyStackPanel, enemy.Location.Y);
 
-                    }
-                    _levelBatAmount = 12;
-                    _levelPotionChancePer100 = 15;
-                    _levelWeapons.Add(EquipmentType.Mace);
+                    }*/
+                    _levelWeapons.Add(EquipmentType.Sword);
                     break;
+                default:
+                    SpawnEnemy(EnemyType.Ghost, 4);
+                    break;
+
             }
             _finishLocation = new Point(5, _playArea.ActualHeight / 2);
         }
@@ -145,22 +171,7 @@ namespace TheJourneyGame
         private void InitializeEnemies()
         {
             _enemiesList = new List<Enemy>();
-            _enemiesList.Add(new Bat(new Point(140, 140), _playArea, 20, 3));
-           /* _enemiesList.Add(new Bat(new Point(300, 150), _playArea, 30, 3));
-            _enemiesList.Add(new Bat(new Point(150, 140), _playArea, 20, 3));
-            _enemiesList.Add(new Bat(new Point(320, 150), _playArea, 30, 3));
-            _enemiesList.Add(new Bat(new Point(200, 140), _playArea, 20, 3));*/
-           /* _enemiesList.Add(new Bat(new Point(220, 150), _playArea, 30, 3));
-            _enemiesList.Add(new Bat(new Point(352, 140), _playArea, 20, 3));
-            _enemiesList.Add(new Bat(new Point(100, 150), _playArea, 30, 3));*/
-
-            foreach (Enemy enemy in _enemiesList)
-            {
-                _playArea.Children.Add(enemy.EnemyStackPanel);
-                Canvas.SetLeft(enemy.EnemyStackPanel, enemy.Location.X);
-                Canvas.SetBottom(enemy.EnemyStackPanel, enemy.Location.Y);
-                
-            }
+           
             Enemy.Timer.Stop();
         }
 
@@ -217,20 +228,27 @@ namespace TheJourneyGame
             foreach (Enemy enemy in _enemiesList)
             {
                 enemy.Attack(_player);
+                
             }
             OnPropertyChanged("PlayerHitPoints");
+            if (_player.IsDead)
+            {
+                ResetGame();
+                _player.RevivePlayer();
+                MainWindow mw = Window.GetWindow(_playArea) as MainWindow;
+                mw.GetMainMenu(true);
+            }
+            
+
         }
 
         private void LevelTimer_Tick(object sender, EventArgs e)
         {
             if (_levelBatAmount > 0)
             {
-                Bat enemyToAdd = new Bat(GetRandomLocation(), _playArea, 30, 4);
-                _enemiesList.Add(enemyToAdd);
-                _playArea.Children.Add(enemyToAdd.EnemyStackPanel);
-                Canvas.SetLeft(enemyToAdd.EnemyStackPanel, enemyToAdd.Location.X);
-                Canvas.SetBottom(enemyToAdd.EnemyStackPanel, enemyToAdd.Location.Y);
-                _levelBatAmount--;
+                int amountOfEnemies = random.Next(1, 3);
+                SpawnEnemy(EnemyType.Bat, amountOfEnemies);
+                _levelBatAmount-=amountOfEnemies;
             }
             else
             {
@@ -240,9 +258,9 @@ namespace TheJourneyGame
             if (!CheckThatPlayerHaveEquipment(EquipmentType.BluePotion))
             {
                 int potionSpawn = random.Next(100);
-                
-
-                if (potionSpawn <= _levelPotionChancePer100)
+                if (potionSpawn <= _levelPotionChancePer100 / 2)
+                    SpawnEquipment(EquipmentType.RedPotion);
+                else if (potionSpawn <= _levelPotionChancePer100)
                     SpawnEquipment(EquipmentType.BluePotion);
             }
             levelTimer.Interval -= _levelTimeIntervalStep;
@@ -255,7 +273,7 @@ namespace TheJourneyGame
             {
                 //Spawnowanie broni z listy dostosowanej do poziomu
                 int spawnChance = random.Next(100);
-                if (spawnChance <= 20)
+                if (spawnChance <= 10)
                 {
                     SpawnEquipment(_levelWeapons.First());
                     _levelWeapons.Remove(_levelWeapons.First());
@@ -343,13 +361,13 @@ namespace TheJourneyGame
                 switch (eqType)
                 {
                     case EquipmentType.Sword:
-                        newItem = new Sword(GetRandomLocation(), "Miecz", 10);
+                        newItem = new Sword(GetRandomLocation(), "Miecz", 15);
                         break;
                     case EquipmentType.Bow:
                         newItem = new Bow(GetRandomLocation(), "Łuk", 5);
                         break;
                     case EquipmentType.Mace:
-                        newItem = new Mace(GetRandomLocation(), "Buława", 12);
+                        newItem = new Mace(GetRandomLocation(), "Buława", 18);
                         break;
                     case EquipmentType.BluePotion:
                         newItem = new Potion(GetRandomLocation(), "Niebieska mikstura", 12, eqType);
@@ -378,11 +396,88 @@ namespace TheJourneyGame
             /*else
                 throw new Exception("Nie można utowrzyć przedmiotu, ponieważ znajduje się on już w Eq gracza.");*/
         }
+        /// <summary>
+        /// Spawns specified amount of enemies in specifed location
+        /// </summary>
+        /// <param name="enemyType">Type of enemy to spawn</param>
+        /// <param name="numberOfEnemyToSpawn">Number of enemies to spawn</param>
+        /// <param name="location">Location</param>
+        public void SpawnEnemy(EnemyType enemyType, int numberOfEnemyToSpawn, Point location)
+        {
+            Enemy newEnemy = null;
+            if (numberOfEnemyToSpawn <= 0)
+                throw new Exception("numberOfEnemyToSpawn have to be > 0!");
+            for(int i = 0; i<numberOfEnemyToSpawn; i++ )
+            {
+                switch (enemyType)
+                {
+                    case EnemyType.Bat:
+                        newEnemy = new Bat(location, _playArea, 30, 5);
+                        break;
+                    case EnemyType.Ghoul:
+                        newEnemy = new Ghoul(location, _playArea, 50, 8);
+                        break;
+                    case EnemyType.Ghost:
+                        newEnemy = new Ghost(location, _playArea, 70, 10);
+                        break;
+
+                }
+
+                _enemiesList.Add(newEnemy);
+                _playArea.Children.Add(newEnemy.EnemyStackPanel);
+                Canvas.SetLeft(newEnemy.EnemyStackPanel, newEnemy.Location.X);
+                Canvas.SetBottom(newEnemy.EnemyStackPanel, newEnemy.Location.Y);
+            }
+            
+        }
+        /// <summary>
+        /// Spawns specified amount of enemies in random location
+        /// </summary>
+        /// <param name="enemyType">Type of enemy to spawn</param>
+        /// <param name="numberOfEnemyToSpawn">Number of enemies to spawn</param>
+        /// <param name="location">Location</param>
+        public void SpawnEnemy(EnemyType enemyType, int numberOfEnemyToSpawn)
+        {
+            Enemy newEnemy = null;
+            if (numberOfEnemyToSpawn <= 0)
+                throw new Exception("numberOfEnemyToSpawn have to be > 0!");
+            for(int i = 0; i<numberOfEnemyToSpawn; i++)
+            {
+                switch (enemyType)
+                {
+                    case EnemyType.Bat:
+                        newEnemy = new Bat(GetRandomLocation(), _playArea, 30, 5);
+                        break;
+                    case EnemyType.Ghoul:
+                        newEnemy = new Ghoul(GetRandomLocation(), _playArea, 50, 8);
+                        break;
+                    case EnemyType.Ghost:
+                        newEnemy = new Ghost(GetRandomLocation(), _playArea, 70, 10);
+                        break;
+                }
+
+                _enemiesList.Add(newEnemy);
+                _playArea.Children.Add(newEnemy.EnemyStackPanel);
+                Canvas.SetLeft(newEnemy.EnemyStackPanel, newEnemy.Location.X);
+                Canvas.SetBottom(newEnemy.EnemyStackPanel, newEnemy.Location.Y);
+            }
+            
+        }
         private bool CheckThatPlayerHaveEquipment(EquipmentType eqType)
         {
             if (_player.EquipmentList.ToList().Exists(eq => eq.EqType == eqType)) return true;
             else return false;
 
+        }
+        private void OnAllPropertyChanged()
+        {
+            OnPropertyChanged("PlayerHitPoints");
+            OnPropertyChanged("playerLocation");
+            OnPropertyChanged("PlayerXPosition");
+            OnPropertyChanged("PlayerYPosition");
+            OnPropertyChanged("PlayerCompletedLevels");
+            OnPropertyChanged("PlayerLevel");
+            OnPropertyChanged("PlayerExperience");
         }
         #endregion
 
@@ -408,6 +503,7 @@ namespace TheJourneyGame
             playerAttackTimer.Interval = new TimeSpan(TimeSpan.FromMilliseconds(2000).Ticks);
             levelTimer.Interval = new TimeSpan(TimeSpan.FromMilliseconds(3000).Ticks);
             levelTimer.Stop();
+            Enemy.Timer.Stop();
             
         }
         /// <summary>
@@ -434,8 +530,10 @@ namespace TheJourneyGame
                     MainWindow mw = MainWindow.GetWindow(_playArea) as MainWindow;
                     mw.GetMainMenu(true);
                     _level++;
-                    if (_level > 2)
-                        _level = 2;
+                    if (_level > _completedLevels + 1)
+                        _completedLevels = _level - 1;
+                    /*if (_level > 2)
+                        _level = 2;*/
                 }
             }
         }
@@ -449,7 +547,7 @@ namespace TheJourneyGame
                 _player.Attack(enemy);
             }
             _enemiesList.RemoveAll(enemy => enemy.HitPoints <= 0);
-
+            OnAllPropertyChanged();
             OnPropertyChanged("EnemiesList");
 
         }

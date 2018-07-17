@@ -74,6 +74,8 @@
     <Compile Include="Model\Bow.cs" />
     <Compile Include="Model\Enemy.cs" />
     <Compile Include="Model\Equipment.cs" />
+    <Compile Include="Model\Ghost.cs" />
+    <Compile Include="Model\Ghoul.cs" />
     <Compile Include="Model\Mace.cs" />
     <Compile Include="Model\Player.cs" />
     <Compile Include="Model\Position.cs" />
@@ -137,6 +139,12 @@
   <ItemGroup>
     <Resource Include="image\BluePotion.png" />
     <Resource Include="image\RedPotion.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\Ghost.png" />
+    <Resource Include="image\GhostHit.png" />
+    <Resource Include="image\Ghoul.png" />
+    <Resource Include="image\GhoulHit.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

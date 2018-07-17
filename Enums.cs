@@ -15,6 +15,12 @@
         BluePotion,
         RedPotion,
     }
+    public enum EnemyType
+    {
+        Bat = 0,
+        Ghoul,
+        Ghost,
+    }
     public interface IFightable
     {
         void Attack(IFightable atackDestination);

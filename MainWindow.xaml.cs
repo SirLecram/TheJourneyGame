@@ -18,12 +18,14 @@ using System.Windows.Threading;
 namespace TheJourneyGame
 {
     /// <summary>
-    /// Ostatnio dodane:  Zaprogramowany przycisk Start Game; Odliczanie przed rozpoczeciem;
-    /// StartGame(); podstawy ResetGame(); Zapetlenie rozgrywki i MainMenu; Pseudo losowy spawn broni
-    /// charakterystycznej dla danego poziomu; 
+    /// Ostatnio dodane:  Podstawy exp i levelowania; GainExp(); Experience stages; LevelUp();
+    /// dodano _basicAttacPower dla Player; Gdy enemy umiera dodaje sie exp; Enum EnemyType;
+    /// SpawnEnemy(); Ghost i Ghoul; Ponowne rozgrywanie levelu; Śmierć!; Max player level;
+    /// Statystyki Grid;
     /// 
-    /// Do zrobienia niedługo: Enemy -> rodzaje, SpawnEnemy(); Poziomy Gry;
-    /// Obsluga przycisków Menu; EXP i levelowanie;
+    /// 
+    /// Do zrobienia niedługo:  Poziomy Gry; Wybieranie z dostepnych leveli
+    /// Obsluga przycisków Menu -> SAve i Load; 
     /// 
     /// Zrobione: Szkielet klasy GameController, (abstr) Position, Player; stworzone pole gry, 
     /// podstawowe dzialanie metody Move() (Equipment, zarys Player); Bindowanie pozycji gracza;
@@ -45,13 +47,14 @@ namespace TheJourneyGame
     /// UStawienie mozliwosci ataku co pol sekundy; Dodano wstepnie potiony;
     /// Dodano grafiki potionow; Dzialanie potionow ; Tworzenie przedmiotow w grze - dwie przeciazone metody;
     /// Dodano tolerancje odleglosci gracz : podnoszony przedmiot; Podstawy renderowania poziomów;
-    /// Timer ze zdarzeniami z danych poziomow; Klasa (Potiony);
+    /// Timer ze zdarzeniami z danych poziomow; Klasa (Potiony); 
+    /// 
     /// 
     /// Do zrobienia:  Klasa Enemy i klasy pochodne;
     /// od Enemy (potwory), dalsze usprawnianie metody Move(); Płynne poruszanie?; 
-    /// GRAFIKA, GUI; Ulepszanie poruszania się enemy; EXP I LVL?; Punkty rankingowe;
+    /// GRAFIKA (levelup), GUI; Ulepszanie poruszania się enemy; EXP I LVL?; Punkty rankingowe;
     /// Atak i TakeAHit - rozwój w Player i Enemy(Obrona); POZIOMY!; Skille Specjalne;
-    /// Zbilansowanie rozgrywki!
+    /// Zbilansowanie rozgrywki!; ReportBox;
     /// </summary>
 
 
@@ -76,6 +79,10 @@ namespace TheJourneyGame
            // playArea.Children.Add(new Rectangle());
             actualPos.DataContext = GameController;
             actualHp.DataContext = GameController;
+            playerLevelLabel.DataContext = GameController;
+            playerHitPointsLabel.DataContext = GameController;
+            playerExperienceLabel.DataContext = GameController;
+            playerCompletedLevelsLabel.DataContext = GameController;
             
         }
         public void InitializeGame()

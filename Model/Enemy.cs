@@ -16,6 +16,7 @@ namespace TheJourneyGame.Model
     {
         protected int _attackRange { get; set; }
         protected int _maxAttackPower { get; set; }
+        public int ExpToGain { get;}
         public int HitPoints { get; protected set; }
         public bool IsDead { get { if (HitPoints <= 0) return true; else return false; } }
         public static DispatcherTimer Timer = new DispatcherTimer();
@@ -27,7 +28,7 @@ namespace TheJourneyGame.Model
         private Direction playerDirection = Direction.Right;
         
         public Enemy(Point point, int moveInterval, long movingTimeSpan, Canvas playArea, int hp, 
-            string imagePath, int maxAttackPower) 
+            string imagePath, int maxAttackPower, int expToGain) 
             : base(point, moveInterval)
         {
             HitPoints = hp;
@@ -36,6 +37,7 @@ namespace TheJourneyGame.Model
             _enemyAppearance.Source = new BitmapImage(new Uri(imagePath, UriKind.Relative));
             _playArea = playArea;
             _maxAttackPower = maxAttackPower;
+            ExpToGain = expToGain;
             InitializeEnemy(movingTimeSpan);
         }
 
@@ -72,7 +74,7 @@ namespace TheJourneyGame.Model
                 playerDirection = CalculatePlayerDirection(GameController.PlayerLocation);
             }
             calculationInterval++;
-            if (calculationInterval >= 4)
+            if (calculationInterval >= 3)
                 calculationInterval = 0;
             Move(playerDirection, _playArea);
            // Move((Direction)random.Next(23, 27), _playArea);
@@ -133,6 +135,11 @@ namespace TheJourneyGame.Model
             // ########### WARUNKI ATAKU ########
             // ########### NIE WCHODZENIE NA GRACZa ########
         }
+        /// <summary>
+        /// Returns true if enemy is dead after taking a hit.
+        /// </summary>
+        /// <param name="hp"></param>
+        /// <returns></returns>
         public virtual bool TakeAHit(int hp)
         {
             HitPoints -= hp;

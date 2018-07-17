@@ -70,6 +70,36 @@
         <Label Content="3" Name="countDownTimer" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
                FontSize="80" HorizontalAlignment="Center" VerticalAlignment="Center" 
                Foreground="#FFCF2323" Visibility="Hidden"/>
+        <Grid Grid.Column="2" Grid.Row="2" HorizontalAlignment="Right">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" Grid.RowSpan="2" Grid.ColumnSpan="4" BorderBrush="DarkSeaGreen"
+                    BorderThickness="2"/>
+            <Label Content="Hit Points: " FontSize="13" Margin="2"/>
+            <Label Content="Level: " Grid.Column="1" FontSize="13" Margin="2"/>
+            <Label Content="Experience: " Grid.Column="2" FontSize="13" Margin="2"/>
+            <Label Content="Completed lvls: " Grid.Column="3" FontSize="13" Margin="2"/>
+
+            <Label Content="{Binding PlayerHitPoints}" FontSize="13" Margin="2"
+                   Grid.Row="1" Name="playerHitPointsLabel"/>
+            <Label Content="{Binding PlayerLevel}" Grid.Column="1" FontSize="13" Margin="2" 
+                   Grid.Row="1" Name="playerLevelLabel"/>
+            <Label Content="{Binding PlayerExperience}" Grid.Column="2" FontSize="13" Margin="2"
+                   Grid.Row="1" Name="playerExperienceLabel"/>
+            <Label Content="{Binding PlayerCompletedLevels}" Grid.Column="3" FontSize="13" Margin="2"
+                   Grid.Row="1" Name="playerCompletedLevelsLabel"/>
+
+
+        </Grid>
 
     </Grid>
 </Window>

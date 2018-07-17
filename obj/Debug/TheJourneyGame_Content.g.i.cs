@@ -8,7 +8,9 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("image/bluepotion.png")]
-[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("image/redpotion.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("image/ghost.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("image/ghosthit.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("image/ghoul.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("image/ghoulhit.png")]
 
 
