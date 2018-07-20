@@ -9,11 +9,12 @@ using System.Windows.Media.Imaging;
 
 namespace TheJourneyGame.Model
 {
+    [Serializable]
     class Potion : Equipment
     {
         public override string Name { get; protected set; }
         private int _restoredHp { get; }
-        public Image EquipmentAppearance { get; protected set; }
+        [NonSerialized] public Image EquipmentAppearance;// { get; protected set; }
         //public bool IsUsed { get; private set; }
 
         public Potion(Point point, string name, int hpRestored, EquipmentType eqType)
@@ -37,6 +38,16 @@ namespace TheJourneyGame.Model
                 return _restoredHp;
             }
             return 0;
+        }
+
+        public void ReloadImagesAfterDeserialization()
+        {
+            string imagePath = GameController.EqImagePathDictionary[EqType];
+            EquipmentAppearance = new Image();
+            EquipmentAppearance.Height = EquipmentAppearance.Width = 30;
+            EquipmentAppearance.Source = new BitmapImage(new Uri(imagePath, UriKind.Relative));
+            EquipmentAppearance.ToolTip = "Name: " + Name.ToString() + ";\n" +
+                "Restored HP: " + _restoredHp.ToString() + ";";
         }
 
     }

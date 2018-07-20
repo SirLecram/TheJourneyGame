@@ -8,6 +8,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace TheJourneyGame.Model
 {
+    [Serializable]
     abstract class Equipment : Position
     {
         public bool IsPickedUp { get; protected set; }

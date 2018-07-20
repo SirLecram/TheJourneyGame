@@ -9,9 +9,10 @@ using System.Windows.Media.Imaging;
 
 namespace TheJourneyGame.Model
 {
+    [Serializable]
     abstract class Weapon : Equipment
     {
-        public Image WeaponAppearance { get; private set; }
+        [NonSerialized] public Image WeaponAppearance;// { get; private set; }
         public override string Name { get; protected set; }
         public int Damage { get; }
         public int Range { get; }
@@ -24,6 +25,14 @@ namespace TheJourneyGame.Model
             WeaponAppearance.Source = new BitmapImage(new Uri(imagePath, UriKind.Relative));
             Damage = damage;
             Range = range;
+        }
+
+        public virtual void ReloadImagesAfterDeserialization()
+        {
+            string imagePath = GameController.EqImagePathDictionary[EqType];
+            WeaponAppearance = new Image();
+            WeaponAppearance.Height = WeaponAppearance.Width = 30;
+            WeaponAppearance.Source = new BitmapImage(new Uri(imagePath, UriKind.Relative));
         }
         /// <summary>
         /// Checks if the enemy is in the right direction (diffrent weapons has diffrent atack

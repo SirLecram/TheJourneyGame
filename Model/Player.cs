@@ -11,6 +11,7 @@ using System.Windows.Threading;
 
 namespace TheJourneyGame.Model
 {
+    [Serializable]
     class Player : Position, IFightable
     {
         #region Private and protected attributes
@@ -23,7 +24,7 @@ namespace TheJourneyGame.Model
         private int _actualAttackRange {
             get
             {
-                if(_equippedItem is Weapon)
+                if (_equippedItem is Weapon)
                     return (_equippedItem as Weapon).Range;
                 else
                     return 30;
@@ -38,16 +39,17 @@ namespace TheJourneyGame.Model
                     return _basicAttacPower;
             }
         }
-        private BitmapImage _playerImage = new BitmapImage(new Uri(@"\image\Player.png", UriKind.Relative));
-        private BitmapImage _playerHitImage = new BitmapImage(new Uri(@"\image\PlayerHit.png", 
+        [NonSerialized] private BitmapImage _playerImage = new BitmapImage(new Uri(@"\image\Player.png", UriKind.Relative));
+        [NonSerialized] private BitmapImage _playerHitImage = new BitmapImage(new Uri(@"\image\PlayerHit.png", 
             UriKind.Relative));
-        private DispatcherTimer animationTimer = new DispatcherTimer();
+        [NonSerialized] private DispatcherTimer animationTimer = new DispatcherTimer();
         #endregion
 
         public int HitPoints { get; private set; }
         public int ExperiencePoints { get; private set; }
         public int PlayerLevel { get; private set; }
-        public Image PlayersAppearance { get; private set; }
+        public int CompletedLevels { get; private set; }
+        [NonSerialized] public Image PlayersAppearance;//{ get; private set; }
         public IReadOnlyDictionary<int, int > ExperienceStages { get => _experienceStages; }
         public bool IsDead { get { if (HitPoints <= 0) return true; else return false; } }
         public IEnumerable<Equipment> EquipmentList { get => _equipmentList; }
@@ -66,8 +68,9 @@ namespace TheJourneyGame.Model
             PlayersAppearance.Source = _playerImage;
             HitPoints = amountOfHP;
             _maxHp = amountOfHP;
-            _basicAttacPower = 4;
+            _basicAttacPower = 20;
             PlayerLevel = 1;
+            CompletedLevels = 0;
             _sightDirection = Direction.Left;
             animationTimer.Interval = new TimeSpan(TimeSpan.FromMilliseconds(800).Ticks);
             animationTimer.Tick += AnimationTimer_Tick;
@@ -97,6 +100,29 @@ namespace TheJourneyGame.Model
             }
             
             
+        }
+        public void LevelCompleted(int levelNumber)
+        {
+            if(levelNumber>CompletedLevels+1)
+                CompletedLevels = levelNumber-1;
+        }
+        public void ReloadImagesAfterDeserialization()
+        {
+            _playerImage = new BitmapImage(new Uri(@"\image\Player.png", UriKind.Relative));
+            _playerHitImage = new BitmapImage(new Uri(@"\image\PlayerHit.png", UriKind.Relative));
+            animationTimer = new DispatcherTimer();
+            PlayersAppearance = new Image();
+            PlayersAppearance.Height = PlayersAppearance.Width = 30;
+            PlayersAppearance.Source = _playerImage;
+            foreach(Equipment eq in _equipmentList)
+            {
+                if (eq is Weapon)
+                    (eq as Weapon).ReloadImagesAfterDeserialization();
+                else if (eq is Potion)
+                    (eq as Potion).ReloadImagesAfterDeserialization();
+            }
+            animationTimer.Tick += AnimationTimer_Tick;
+            animationTimer.Start();
         }
         private void AnimationTimer_Tick(object sender, EventArgs e)
         {
@@ -132,14 +158,15 @@ namespace TheJourneyGame.Model
             _equipmentList.Add(itemToEquip);
             itemToEquip.PickUp();
         }
-        public void SelectToUse(EquipmentType eqToSelect)
+        public bool SelectToUse(EquipmentType eqToSelect)
         {
             Equipment selectedItem = _equipmentList.Find(Equipment => Equipment.EqType == eqToSelect);
             if (selectedItem != null)
             {
                 _equippedItem = selectedItem;
+                return true;
             }
-            
+            return false;
         }
         public void UsePotion(EquipmentType potionType)
         {
@@ -190,6 +217,7 @@ namespace TheJourneyGame.Model
             base.Move(direction, playArea);
             _sightDirection = direction;
         }
+
         #endregion
     }
 }

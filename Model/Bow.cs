@@ -7,6 +7,7 @@ using System.Windows;
 
 namespace TheJourneyGame.Model
 {
+    [Serializable]
     class Bow : Weapon
     {
         private const int _attackDirections = 1;
@@ -15,6 +16,13 @@ namespace TheJourneyGame.Model
         public Bow(Point point, string name, int damage) 
             : base(point, name, damage, 150, EquipmentType.Bow)
         {
+            WeaponAppearance.ToolTip = "Attack Directions: " + _attackDirections.ToString() + ";\n" +
+                "Attack Range: " + Range.ToString() + ";\n" + "Damage: " + Damage.ToString() + ";";
+        }
+
+        public override void ReloadImagesAfterDeserialization()
+        {
+            base.ReloadImagesAfterDeserialization();
             WeaponAppearance.ToolTip = "Attack Directions: " + _attackDirections.ToString() + ";\n" +
                 "Attack Range: " + Range.ToString() + ";\n" + "Damage: " + Damage.ToString() + ";";
         }

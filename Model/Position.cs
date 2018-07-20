@@ -8,7 +8,7 @@ using System.Windows.Controls;
 
 namespace TheJourneyGame.Model
 {
-
+    [Serializable]
     abstract class Position
     {
         protected int _moveInterval { get; }

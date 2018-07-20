@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -15,6 +17,7 @@ using TheJourneyGame.Model;
 
 namespace TheJourneyGame
 {
+    [Serializable]
     class GameController : INotifyPropertyChanged
     {
         public List<Weapon> WeaponsInRoom { get; private set; }
@@ -39,7 +42,8 @@ namespace TheJourneyGame
                 } 
                 else return String.Empty; } }
         public int PlayerCompletedLevels
-        { get { if (_player != null) return _completedLevels; else return 0; } }
+        { get { if (_player != null) return _player.CompletedLevels; else return 0; } }
+        public int ActualGameLevel { get => _level; }
         public static Point PlayerLocation { get => _player.Location; }
         public double PlayerXPosition { get => _player.Location.X; }
         public double PlayerYPosition { get => _player.Location.Y; }
@@ -48,19 +52,19 @@ namespace TheJourneyGame
         private static Player _player { get; set; }
         private bool _isLevelFinished = false;
         private int _completedLevels { get; set; }
-        
-        
-        private Canvas _playArea { get; }
+
+
+        private Canvas _playArea;//{ get; private set; }
         private List<Enemy> _enemiesList { get; set; }
         private int _level { get; set; }
         private Point _finishLocation { get; set; }
         public Point playerLocation { get => location(); }
-        private DispatcherTimer playerAttackTimer = new DispatcherTimer();
+        private DispatcherTimer attacksOnPlayerTimer = new DispatcherTimer();
         private DispatcherTimer levelTimer = new DispatcherTimer();
         private Dictionary<EquipmentType, Image> _equipmentImageDictionary = 
             new Dictionary<EquipmentType, Image>();
         private static Dictionary<EquipmentType, string> _equipmentImagePathDictionary { get; set; }
-        private Grid _equipmentGrid { get; }
+        private Grid _equipmentGrid;
         private int _levelBatAmount;
         private int _levelGhoulAmount;
         private List<EquipmentType> _levelWeapons;
@@ -81,6 +85,7 @@ namespace TheJourneyGame
             InitializePlayer();
             InitializeGameAndTimers();
             InitializeEquipmentImages();
+            InitializeEnemies();
            
         }
         public Point location()
@@ -111,20 +116,30 @@ namespace TheJourneyGame
             Canvas.SetLeft(_player.PlayersAppearance, _player.Location.X);
             Canvas.SetBottom(_player.PlayersAppearance, _player.Location.Y);
         }
+        private void InitializePlayer(Player player)
+        {
+            if (_playArea.Children.Contains(_player.PlayersAppearance))
+                _playArea.Children.Remove(_player.PlayersAppearance);
+            _player = player;
+            _playArea.Children.Add(_player.PlayersAppearance);
+            Canvas.SetLeft(_player.PlayersAppearance, _player.Location.X);
+            Canvas.SetBottom(_player.PlayersAppearance, _player.Location.Y);
+        }
 
         private void InitializeGameAndTimers()
         {
             WeaponsInRoom = new List<Weapon>();
             EquipmentInRoom = new List<Equipment>();
             
-            playerAttackTimer.Interval = new TimeSpan(TimeSpan.FromMilliseconds(2000).Ticks);
-            playerAttackTimer.Tick += PlayerAttackTimer_Tick;
+            attacksOnPlayerTimer.Interval = new TimeSpan(TimeSpan.FromMilliseconds(2000).Ticks);
+            attacksOnPlayerTimer.Tick += AttackOnPlayerTimer_Tick;
             levelTimer.Interval = new TimeSpan(TimeSpan.FromMilliseconds(4000).Ticks);
             levelTimer.Tick += LevelTimer_Tick;
 
         }
         private void InitializeLevel(int levelNumber)
         {
+            _isLevelFinished = false;
             InitializeEnemies();
             switch (levelNumber)
             {
@@ -136,9 +151,10 @@ namespace TheJourneyGame
                     _levelBatAmount = 10;
                     _levelPotionChancePer100 = 20;
                     _levelTimeIntervalStep = new TimeSpan(TimeSpan.FromMilliseconds(100).Ticks);
-                    levelTimer.Interval = new TimeSpan(TimeSpan.FromSeconds(5).Ticks);
+                    levelTimer.Interval = new TimeSpan(TimeSpan.FromSeconds(2).Ticks);
                     break;
                 case 2:
+                    
                     SpawnEquipment(EquipmentType.BluePotion);
                     SpawnEnemy(EnemyType.Bat, 3);
                     _levelBatAmount = 15;
@@ -155,6 +171,8 @@ namespace TheJourneyGame
                     break;
                 default:
                     SpawnEnemy(EnemyType.Ghost, 4);
+                    SpawnEquipment(EquipmentType.Mace);
+                    SpawnEquipment(EquipmentType.Bow);
                     break;
 
             }
@@ -165,8 +183,6 @@ namespace TheJourneyGame
             InitializeLevel(_level);
 
         }
-
-        
 
         private void InitializeEnemies()
         {
@@ -197,6 +213,7 @@ namespace TheJourneyGame
                 if (i < 3)
                 {
                     newImage.MouseDown += NewImage_MouseDown;
+                    newImage.Opacity = 0.7;
                 }
             }
         }
@@ -218,19 +235,24 @@ namespace TheJourneyGame
             
             int indexOfKey = _equipmentImageDictionary.Values.ToList().IndexOf(imgToFind);
             EquipmentType selectedEqType = _equipmentImageDictionary.Keys.ToList()[indexOfKey];
-            _player.SelectToUse(selectedEqType);
+            if(_player.SelectToUse(selectedEqType))
+            {
+                int allWeapons = 3;
+                for(int i = 0; i<allWeapons; i++)
+                {
+                    if (i == (int)selectedEqType)
+                        _equipmentImageDictionary[selectedEqType].Opacity = 1.0;
+                    else
+                        _equipmentImageDictionary[(EquipmentType)i].Opacity = 0.7;
+                }
+
+            }
             SpawnEquipment(EquipmentType.RedPotion);
 
         }
 
-        private void PlayerAttackTimer_Tick(object sender, EventArgs e)
+        private void AttackOnPlayerTimer_Tick(object sender, EventArgs e)
         {
-            foreach (Enemy enemy in _enemiesList)
-            {
-                enemy.Attack(_player);
-                
-            }
-            OnPropertyChanged("PlayerHitPoints");
             if (_player.IsDead)
             {
                 ResetGame();
@@ -238,6 +260,13 @@ namespace TheJourneyGame
                 MainWindow mw = Window.GetWindow(_playArea) as MainWindow;
                 mw.GetMainMenu(true);
             }
+            foreach (Enemy enemy in _enemiesList)
+            {
+                enemy.Attack(_player);
+                
+            }
+            OnPropertyChanged("PlayerHitPoints");
+            
             
 
         }
@@ -469,6 +498,43 @@ namespace TheJourneyGame
             else return false;
 
         }
+        public void LoadGame(string filePath)
+        {
+            using (Stream input = File.OpenRead(filePath))
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+
+                object data = formatter.Deserialize(input);
+                if (data.GetType() == _player.GetType())
+                {
+                    Player playerToLoad = data as Player;
+                    ResetGame();
+                    playerToLoad.ReloadImagesAfterDeserialization();
+                    InitializePlayer(playerToLoad);
+                    InitializeEqAfterDeserialization();
+                    InitializePlayerPositionBinding();
+                    _level = PlayerCompletedLevels+1;
+                    OnAllPropertyChanged();
+                    //newGameController.ReloadDataAfterDeserialization(GameController);
+                }
+            }
+        }
+        public void SaveGame(string filePath)
+        {
+            using (Stream output = File.OpenWrite(filePath))
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(output, _player);
+            }
+        }
+        public void InitializeEqAfterDeserialization()
+        {
+            foreach(Equipment eq in _player.EquipmentList)
+            {
+                _equipmentImageDictionary[eq.EqType].Visibility = Visibility.Visible;
+                AddToolTipsToGui(eq);
+            }
+        }
         private void OnAllPropertyChanged()
         {
             OnPropertyChanged("PlayerHitPoints");
@@ -478,6 +544,7 @@ namespace TheJourneyGame
             OnPropertyChanged("PlayerCompletedLevels");
             OnPropertyChanged("PlayerLevel");
             OnPropertyChanged("PlayerExperience");
+            OnPropertyChanged("ActualGameLevel");
         }
         #endregion
 
@@ -488,7 +555,7 @@ namespace TheJourneyGame
         public void StartGame()
         {
             Enemy.Timer.Start();
-            playerAttackTimer.Start();
+            attacksOnPlayerTimer.Start();
             levelTimer.Start();
             if (!_playArea.Children.Contains(_player.PlayersAppearance))
                 _playArea.Children.Add(_player.PlayersAppearance);
@@ -500,7 +567,7 @@ namespace TheJourneyGame
             _isLevelFinished = false;
             _playArea.Children.Clear();
             _enemiesList.Clear();
-            playerAttackTimer.Interval = new TimeSpan(TimeSpan.FromMilliseconds(2000).Ticks);
+            attacksOnPlayerTimer.Interval = new TimeSpan(TimeSpan.FromMilliseconds(2000).Ticks);
             levelTimer.Interval = new TimeSpan(TimeSpan.FromMilliseconds(3000).Ticks);
             levelTimer.Stop();
             Enemy.Timer.Stop();
@@ -518,8 +585,7 @@ namespace TheJourneyGame
             OnPropertyChanged("PlayerYPosition");
             
             PickUpEquipment();
-            if (!_enemiesList.Any())
-                _isLevelFinished = true;
+            
             if(_isLevelFinished)
             {
                 double maxPositionDiffrence = 10;
@@ -530,12 +596,17 @@ namespace TheJourneyGame
                     MainWindow mw = MainWindow.GetWindow(_playArea) as MainWindow;
                     mw.GetMainMenu(true);
                     _level++;
-                    if (_level > _completedLevels + 1)
-                        _completedLevels = _level - 1;
+                    _player.LevelCompleted(_level);
+                    OnPropertyChanged("PlayerCompletedLevels");
+                    //OnAllPropertyChanged();
+                    /*if (_level > _completedLevels + 1)
+                        _completedLevels = _level - 1;*/
                     /*if (_level > 2)
                         _level = 2;*/
                 }
             }
+            if (!_enemiesList.Any() && !levelTimer.IsEnabled)
+                _isLevelFinished = true;
         }
         /// <summary>
         /// A method which is called by event when player is trying to attack enemy

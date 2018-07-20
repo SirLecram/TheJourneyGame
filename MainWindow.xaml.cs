@@ -14,18 +14,23 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
+using Microsoft.Win32;
 
 namespace TheJourneyGame
 {
     /// <summary>
-    /// Ostatnio dodane:  Podstawy exp i levelowania; GainExp(); Experience stages; LevelUp();
-    /// dodano _basicAttacPower dla Player; Gdy enemy umiera dodaje sie exp; Enum EnemyType;
-    /// SpawnEnemy(); Ghost i Ghoul; Ponowne rozgrywanie levelu; Śmierć!; Max player level;
-    /// Statystyki Grid;
+    /// Ostatnio dodane: Serializacja, zapis i odczyt stanu gry -> SaveFile() i LoadFile(); 
+    /// Inicializacja wygladu ekwipunku po deserializacji 
+    /// Poprawa wczytywania - rozpoczecie od poziomu zakonczonego; Wskazywanie wybranej aktualnie broni;
+    /// UWAGA: (DODAC INTERFEJS? np. IImageDeserializable? po deserialilzacji)
     /// 
+    /// Do zrobienia niedługo:  Poziomy Gry;  Wybór poziomu z ukonczonych;
+    /// Obsluga przycisków Menu -> SAve i Load; Select level window; Pokazywanie poziomu rozgrywki;
+    /// GroupBox; 
     /// 
-    /// Do zrobienia niedługo:  Poziomy Gry; Wybieranie z dostepnych leveli
-    /// Obsluga przycisków Menu -> SAve i Load; 
+    /// BLEDY: Poruszanie przed rozpoczeciem gry -> Wyjatek (WYELIMINOWANE CHYBA - TESTY)
     /// 
     /// Zrobione: Szkielet klasy GameController, (abstr) Position, Player; stworzone pole gry, 
     /// podstawowe dzialanie metody Move() (Equipment, zarys Player); Bindowanie pozycji gracza;
@@ -48,13 +53,18 @@ namespace TheJourneyGame
     /// Dodano grafiki potionow; Dzialanie potionow ; Tworzenie przedmiotow w grze - dwie przeciazone metody;
     /// Dodano tolerancje odleglosci gracz : podnoszony przedmiot; Podstawy renderowania poziomów;
     /// Timer ze zdarzeniami z danych poziomow; Klasa (Potiony); 
+    /// Klasa Enemy i klasy pochodne; Podstawy EXP i LEVEL;
+    /// Podstawy exp i levelowania; GainExp(); Experience stages; LevelUp();
+    /// dodano _basicAttacPower dla Player; Gdy enemy umiera dodaje sie exp; Enum EnemyType;
+    /// SpawnEnemy(); Ghost i Ghoul; Ponowne rozgrywanie levelu; Śmierć!; Max player level;
+    /// Statystyki Grid;
     /// 
     /// 
-    /// Do zrobienia:  Klasa Enemy i klasy pochodne;
-    /// od Enemy (potwory), dalsze usprawnianie metody Move(); Płynne poruszanie?; 
+    /// Do zrobienia:  
+    /// dalsze usprawnianie metody Move(); Płynne poruszanie?; 
     /// GRAFIKA (levelup), GUI; Ulepszanie poruszania się enemy; EXP I LVL?; Punkty rankingowe;
     /// Atak i TakeAHit - rozwój w Player i Enemy(Obrona); POZIOMY!; Skille Specjalne;
-    /// Zbilansowanie rozgrywki!; ReportBox;
+    /// Zbilansowanie rozgrywki!; ReportBox; ZAPIS I ODCZYT;
     /// </summary>
 
 
@@ -83,6 +93,7 @@ namespace TheJourneyGame
             playerHitPointsLabel.DataContext = GameController;
             playerExperienceLabel.DataContext = GameController;
             playerCompletedLevelsLabel.DataContext = GameController;
+            numberOfPlayingLevelLabel.DataContext = GameController;
             
         }
         public void InitializeGame()
@@ -92,36 +103,62 @@ namespace TheJourneyGame
             countDownDTimer.Tick += CountDownDTimer_Tick;
         }
 
+        public void SaveGame()
+        {
+            SaveFileDialog saveFile = new SaveFileDialog();
+            saveFile.Filter = "Pliki zapisu (*.dat)|*.dat | Wszystkie pliki (*.*)|*.*";
+            bool? result = saveFile.ShowDialog();
+            if(result == true)
+            {
+                GameController.SaveGame(saveFile.FileName);
+            }
+            
+        }
+
+        public void LoadGame()
+        {
+            OpenFileDialog openFile = new OpenFileDialog();
+            openFile.Filter = "Pliki zapisu (*.dat)|*.dat | Wszystkie pliki (*.*)|*.*";
+            bool? result = openFile.ShowDialog();
+            if(result == true)
+            {
+                GameController.LoadGame(openFile.FileName);
+            }
+        }
+
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            
-            Key keyPressed = e.Key;
-            switch(keyPressed)
+            if(!countDownDTimer.IsEnabled)
             {
-                case Key.A:
-                    TimeSpan timeSpan = DateTime.Now - lastAttack;
+                Key keyPressed = e.Key;
+                switch (keyPressed)
+                {
+                    case Key.A:
+                        TimeSpan timeSpan = DateTime.Now - lastAttack;
 
-                    if (timeSpan > TimeSpan.FromSeconds(0.5))
-                    {
-                        lastAttack = DateTime.Now;
-                        GameController.AttackEnemy();
-                    }
-                    else
-                        Debug.Print("Za wczesnie aby uzyc broni");
-                    break;
-                case Key.E:
-                    GameController.UsePotion(EquipmentType.BluePotion);
-                    break;
-                case Key.R:
-                    GameController.UsePotion(EquipmentType.RedPotion);
-                    break;
-                case Key.Left:
-                case Key.Up:
-                case Key.Right:
-                case Key.Down:
-                    GameController.Move((Direction)keyPressed);
-                    break;
+                        if (timeSpan > TimeSpan.FromSeconds(0.5))
+                        {
+                            lastAttack = DateTime.Now;
+                            GameController.AttackEnemy();
+                        }
+                        else
+                            Debug.Print("Za wczesnie aby uzyc broni");
+                        break;
+                    case Key.E:
+                        GameController.UsePotion(EquipmentType.BluePotion);
+                        break;
+                    case Key.R:
+                        GameController.UsePotion(EquipmentType.RedPotion);
+                        break;
+                    case Key.Left:
+                    case Key.Up:
+                    case Key.Right:
+                    case Key.Down:
+                        GameController.Move((Direction)keyPressed);
+                        break;
+                }
             }
+            
                 
         }
 
@@ -129,9 +166,9 @@ namespace TheJourneyGame
         {
             mainMenuStackPanel.Visibility = Visibility.Hidden;
             countDownTimer.Visibility = Visibility.Visible;
-            
-            countDownDTimer.Start(); // Game is starting ;
             GameController.InitializeLevel();
+            countDownDTimer.Start(); // Game is starting ;
+            
         }
 
         private void CountDownDTimer_Tick(object sender, EventArgs e)
@@ -155,6 +192,17 @@ namespace TheJourneyGame
                 startNewGameButton.Content = "Kontynuuj przygodę!";
             mainMenuStackPanel.Visibility = Visibility.Visible;
 
+        }
+
+        private void SaveGameButton_Click(object sender, RoutedEventArgs e)
+        {
+            
+            SaveGame();
+        }
+
+        private void loadGameButton_Click(object sender, RoutedEventArgs e)
+        {
+            LoadGame();
         }
     }
 }

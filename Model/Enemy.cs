@@ -12,6 +12,7 @@ using System.Windows.Threading;
 
 namespace TheJourneyGame.Model
 {
+    [Serializable]
     abstract class Enemy : Position, IFightable, INotifyPropertyChanged
     {
         protected int _attackRange { get; set; }

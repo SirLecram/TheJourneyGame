@@ -7,6 +7,7 @@ using System.Windows;
 
 namespace TheJourneyGame.Model
 {
+    [Serializable]
     class Mace : Weapon
     {
         private const int _attackDirections = 4;
@@ -18,6 +19,12 @@ namespace TheJourneyGame.Model
                 "Attack Range: " + Range.ToString() + ";\n" + "Damage: " + Damage.ToString() + ";";
         }
 
+        public override void ReloadImagesAfterDeserialization()
+        {
+            base.ReloadImagesAfterDeserialization();
+            WeaponAppearance.ToolTip = "Attack Directions: " + _attackDirections.ToString() + ";\n" +
+                "Attack Range: " + Range.ToString() + ";\n" + "Damage: " + Damage.ToString() + ";";
+        }
         public override bool UseWeapon(Point point, Direction sightDirection)
         {
             return true;

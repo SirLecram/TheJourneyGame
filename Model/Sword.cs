@@ -7,6 +7,7 @@ using System.Windows;
 
 namespace TheJourneyGame.Model
 {
+    [Serializable]
     class Sword : Weapon
     {
         private const int _attackDirections = 3;
@@ -18,7 +19,12 @@ namespace TheJourneyGame.Model
             WeaponAppearance.ToolTip = "Attack Directions: " + _attackDirections.ToString() + ";\n" +
                 "Attack Range: " + Range.ToString() + ";\n" + "Damage: " + Damage.ToString() + ";";
         }
-
+        public override void ReloadImagesAfterDeserialization()
+        {
+            base.ReloadImagesAfterDeserialization();
+            WeaponAppearance.ToolTip = "Attack Directions: " + _attackDirections.ToString() + ";\n" +
+                "Attack Range: " + Range.ToString() + ";\n" + "Damage: " + Damage.ToString() + ";";
+        }
         public override bool UseWeapon(Point enemyLocation, Direction sightDirection)
         {
             switch(sightDirection)

@@ -61,8 +61,12 @@
             <Label Content="Main Menu" FontSize="20" HorizontalContentAlignment="Center"/>
             <Button Content="Rozpocznij nową przygodę!" Name="startNewGameButton" Margin="8"
                     HorizontalAlignment="Center" FontSize="15" Width="200" Height="30" Click="StartNewGameButton_Click"/>
-            <Button Content="Wczytaj przygodę!" Name="loadGameButton" Margin="8"
+            <Button Content="Wybierz poziom" Name="selectLevelButton" Margin="8"
                     HorizontalAlignment="Center" FontSize="15" Width="200" Height="30"/>
+            <Button Content="Zapisz przygodę" Name="saveGameButton" Margin="8"
+                    HorizontalAlignment="Center" FontSize="15" Width="200" Height="30" Click="SaveGameButton_Click"/>
+            <Button Content="Wczytaj przygodę" Name="loadGameButton" Margin="8"
+                    HorizontalAlignment="Center" FontSize="15" Width="200" Height="30" Click="loadGameButton_Click"/>
             <Button Content="Wyjdź!" Name="exitButton" Margin="8"
                     HorizontalAlignment="Center" FontSize="15" Width="200" Height="30"/>
             
@@ -100,6 +104,10 @@
 
 
         </Grid>
-
+        <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left"
+                    Orientation="Horizontal">
+            <Label Content="Rozgrywany poziom: " FontSize="25"/>
+            <Label Name="numberOfPlayingLevelLabel" Content="{Binding ActualGameLevel}" FontSize="25"/>
+        </StackPanel>
     </Grid>
 </Window>
