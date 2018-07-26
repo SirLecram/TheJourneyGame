@@ -14,7 +14,7 @@ namespace TheJourneyGame.Model
 
 
         public Bow(Point point, string name, int damage) 
-            : base(point, name, damage, 150, EquipmentType.Bow)
+            : base(point, name, damage, 90, EquipmentType.Bow)
         {
             WeaponAppearance.ToolTip = "Attack Directions: " + _attackDirections.ToString() + ";\n" +
                 "Attack Range: " + Range.ToString() + ";\n" + "Damage: " + Damage.ToString() + ";";

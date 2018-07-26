@@ -26,6 +26,10 @@
         void Attack(IFightable atackDestination);
         bool TakeAHit(int hpToTake);
     }
+    public interface IDeserializable
+    {
+        void ReloadImagesAfterDeserialization();
+    }
 
 
 }

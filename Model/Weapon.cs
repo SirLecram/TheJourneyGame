@@ -10,7 +10,7 @@ using System.Windows.Media.Imaging;
 namespace TheJourneyGame.Model
 {
     [Serializable]
-    abstract class Weapon : Equipment
+    abstract class Weapon : Equipment, IDeserializable
     {
         [NonSerialized] public Image WeaponAppearance;// { get; private set; }
         public override string Name { get; protected set; }

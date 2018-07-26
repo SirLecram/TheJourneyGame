@@ -12,7 +12,7 @@ using System.Windows.Threading;
 namespace TheJourneyGame.Model
 {
     [Serializable]
-    class Player : Position, IFightable
+    class Player : Position, IFightable, IDeserializable
     {
         #region Private and protected attributes
         private Equipment _equippedItem;
@@ -20,7 +20,7 @@ namespace TheJourneyGame.Model
         private Direction _sightDirection { get; set; }
         private Dictionary<int, int> _experienceStages = new Dictionary<int, int>();
         private int _maxHp { get; set; }
-        private int _basicAttacPower { get; set; }
+        private decimal _basicAttacPower { get; set; }
         private int _actualAttackRange {
             get
             {
@@ -29,7 +29,7 @@ namespace TheJourneyGame.Model
                 else
                     return 30;
             } }
-        private int _actualAttackPower
+        private decimal _actualAttackPower
         {
             get
             {
@@ -39,6 +39,7 @@ namespace TheJourneyGame.Model
                     return _basicAttacPower;
             }
         }
+        private decimal _basicDefenceMultipler;
         [NonSerialized] private BitmapImage _playerImage = new BitmapImage(new Uri(@"\image\Player.png", UriKind.Relative));
         [NonSerialized] private BitmapImage _playerHitImage = new BitmapImage(new Uri(@"\image\PlayerHit.png", 
             UriKind.Relative));
@@ -68,7 +69,8 @@ namespace TheJourneyGame.Model
             PlayersAppearance.Source = _playerImage;
             HitPoints = amountOfHP;
             _maxHp = amountOfHP;
-            _basicAttacPower = 20;
+            _basicAttacPower = 10;
+            _basicDefenceMultipler = 1.0M;
             PlayerLevel = 1;
             CompletedLevels = 0;
             _sightDirection = Direction.Left;
@@ -89,18 +91,6 @@ namespace TheJourneyGame.Model
 
         }
 
-        public void LevelUp()
-        {
-            if(PlayerLevel<11)
-            {
-                PlayerLevel++;
-                _maxHp += 5;
-                _basicAttacPower++;
-                HitPoints = _maxHp;
-            }
-            
-            
-        }
         public void LevelCompleted(int levelNumber)
         {
             if(levelNumber>CompletedLevels+1)
@@ -114,12 +104,9 @@ namespace TheJourneyGame.Model
             PlayersAppearance = new Image();
             PlayersAppearance.Height = PlayersAppearance.Width = 30;
             PlayersAppearance.Source = _playerImage;
-            foreach(Equipment eq in _equipmentList)
+            foreach(IDeserializable eq in _equipmentList)
             {
-                if (eq is Weapon)
-                    (eq as Weapon).ReloadImagesAfterDeserialization();
-                else if (eq is Potion)
-                    (eq as Potion).ReloadImagesAfterDeserialization();
+                eq.ReloadImagesAfterDeserialization();
             }
             animationTimer.Tick += AnimationTimer_Tick;
             animationTimer.Start();
@@ -140,7 +127,7 @@ namespace TheJourneyGame.Model
         public bool TakeAHit(int numberOfHP)
         {
             //OTrzymanie ciosu - w przyszlosci rowniez tarcza i obrona
-            HitPoints -= numberOfHP;
+            HitPoints -=(int)( numberOfHP * _basicDefenceMultipler);
             if (IsDead)
                 MessageBox.Show("UMARLES, SORRY -> Do implementacji śmierć gracza;");
             PlayersAppearance.Source = _playerHitImage;
@@ -177,7 +164,7 @@ namespace TheJourneyGame.Model
         public void GainExp(int expToGain)
         {
             ExperiencePoints += expToGain;
-            if (ExperiencePoints > _experienceStages[PlayerLevel])
+            if (ExperiencePoints >= _experienceStages[PlayerLevel])
                 LevelUp();
         }
         public void RevivePlayer()
@@ -186,6 +173,17 @@ namespace TheJourneyGame.Model
             location = new Point(900, 120);
             
         }
+        public void LevelUp()
+        {
+            if (PlayerLevel < 11)
+            {
+                PlayerLevel++;
+                _maxHp += 8;
+                _basicAttacPower += 2;
+                _basicDefenceMultipler -= 0.05M;
+                HitPoints = _maxHp;
+            }
+        }
         /// <summary>
         /// A method which provide a way to attack selected enemy
         /// </summary>
@@ -193,8 +191,8 @@ namespace TheJourneyGame.Model
         public void Attack(IFightable enemyToAttack)
         {
             Enemy enemy = (Enemy)enemyToAttack;
-            int minDamage = Math.Abs(_actualAttackPower - _basicAttacPower);
-            int maxDamage = _actualAttackPower + 1;
+            int minDamage = (int)Math.Abs(_actualAttackPower - _basicAttacPower);
+            int maxDamage = (int)_actualAttackPower + 1;
             if (Nearby(enemy.Location, _actualAttackRange) && _equippedItem is Weapon)
             {
                 if ((_equippedItem as Weapon).UseWeapon(enemy.Location, _sightDirection))

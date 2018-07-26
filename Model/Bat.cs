@@ -37,7 +37,7 @@ namespace TheJourneyGame.Model
         public override void Attack(IFightable atackDestination)
         {
             if (Nearby(_playerPosition, _attackRange))
-                atackDestination.TakeAHit(random.Next(_maxAttackPower+1));
+                atackDestination.TakeAHit(random.Next(1, _maxAttackPower+1));
             
             
         }

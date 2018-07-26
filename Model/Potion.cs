@@ -10,7 +10,7 @@ using System.Windows.Media.Imaging;
 namespace TheJourneyGame.Model
 {
     [Serializable]
-    class Potion : Equipment
+    class Potion : Equipment, IDeserializable
     {
         public override string Name { get; protected set; }
         private int _restoredHp { get; }

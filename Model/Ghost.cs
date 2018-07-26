@@ -11,14 +11,15 @@ namespace TheJourneyGame.Model
 {
     class Ghost : Enemy
     {
-        private const int _enemyMoveInterval = 5;
+        private const int _enemyMoveInterval = 6;
         private const long _movingTimeSpan = 700000;
-        private const int _expToGain = 25;
+        private const int _expToGain = 55;
         private const string _imagePath = @"\image\Ghost.png";
         private BitmapImage _image = new BitmapImage(new Uri(@"\image\Ghost.png",
             UriKind.Relative));
         private BitmapImage _hitImage = new BitmapImage(new Uri(@"\image\GhostHit.png",
             UriKind.Relative));
+        
 
         public string Name { get; }
 
@@ -26,7 +27,7 @@ namespace TheJourneyGame.Model
             : base(point, _enemyMoveInterval, _movingTimeSpan, playArea, hp, _imagePath, maxAttackPower,
                   _expToGain)
         {
-            _attackRange = 55;
+            _attackRange = 65;
             Name = "Ghost";
             _enemyAppearance.ToolTip = Name;
         }
@@ -34,7 +35,7 @@ namespace TheJourneyGame.Model
         public override void Attack(IFightable atackDestination)
         {
             if (Nearby(_playerPosition, _attackRange))
-                atackDestination.TakeAHit(random.Next(_maxAttackPower + 1));
+                atackDestination.TakeAHit(random.Next(15, _maxAttackPower + 1));
 
 
         }
@@ -42,6 +43,19 @@ namespace TheJourneyGame.Model
         public override void Move(Direction direction, Canvas playArea)
         {
             base.Move(direction, playArea);
+            int teleportChance = random.Next(100);
+            if(teleportChance<10)
+            {
+                EnemyStackPanel.Visibility = Visibility.Hidden;
+
+                base.Move(CalculatePlayerDirection(GameController.PlayerLocation), playArea);
+                base.Move(CalculatePlayerDirection(GameController.PlayerLocation), playArea);
+                base.Move(CalculatePlayerDirection(GameController.PlayerLocation), playArea);
+                base.Move(CalculatePlayerDirection(GameController.PlayerLocation), playArea);
+                base.Move(CalculatePlayerDirection(GameController.PlayerLocation), playArea);
+
+                EnemyStackPanel.Visibility = Visibility.Visible;
+            }
             if (_enemyAppearance.Source != _image)
             {
                 _enemyAppearance.Source = _image;

@@ -13,7 +13,7 @@ namespace TheJourneyGame.Model
     {
         private const int _enemyMoveInterval = 4;
         private const long _movingTimeSpan = 800000;
-        private const int _expToGain = 15;
+        private const int _expToGain = 25;
         private const string _imagePath = @"\image\Ghoul.png";
         private BitmapImage _image = new BitmapImage(new Uri(@"\image\Ghoul.png",
             UriKind.Relative));
@@ -26,7 +26,7 @@ namespace TheJourneyGame.Model
             : base(point, _enemyMoveInterval, _movingTimeSpan, playArea, hp, _imagePath, maxAttackPower,
                   _expToGain)
         {
-            _attackRange = 70;
+            _attackRange = 60;
             Name = "Ghoul";
             _enemyAppearance.ToolTip = Name;
         }
@@ -34,7 +34,8 @@ namespace TheJourneyGame.Model
         public override void Attack(IFightable atackDestination)
         {
             if (Nearby(_playerPosition, _attackRange))
-                atackDestination.TakeAHit(random.Next(_maxAttackPower + 1));
+                atackDestination.TakeAHit(random.Next(10, _maxAttackPower + 1));
+            
         }
         public override bool TakeAHit(int hp)
         {

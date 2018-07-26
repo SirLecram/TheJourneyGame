@@ -14,23 +14,27 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.IO;
 using Microsoft.Win32;
 
 namespace TheJourneyGame
 {
     /// <summary>
-    /// Ostatnio dodane: Serializacja, zapis i odczyt stanu gry -> SaveFile() i LoadFile(); 
-    /// Inicializacja wygladu ekwipunku po deserializacji 
-    /// Poprawa wczytywania - rozpoczecie od poziomu zakonczonego; Wskazywanie wybranej aktualnie broni;
-    /// UWAGA: (DODAC INTERFEJS? np. IImageDeserializable? po deserialilzacji)
+    /// Ostatnio dodane: Poprawa błędu z podwójną inkrementacją _level po ukonczonym lvl;
+    /// poprawa bledu z zakonczeniem lvl; poprawa bledu z wyjatkiem przy ataku na przeciwnikow,
+    /// w przypadku gdy gracz zginal; Poprawki w spawnowaniu enemy i przedmiotow i levelTimer;
+    /// Dodanie nowych poziomow (2-5) i bilansowanie gry; Ghost potrafi sie teleportować;
+    /// Zamiana uzywanej broni numerami 1 - 3; Poprawiony blad z czyszczeniem ekwipunku po wczutaniu
+    /// wcześnejszego zapisu gry;
     /// 
-    /// Do zrobienia niedługo:  Poziomy Gry;  Wybór poziomu z ukonczonych;
-    /// Obsluga przycisków Menu -> SAve i Load; Select level window; Pokazywanie poziomu rozgrywki;
-    /// GroupBox; 
+    /// Do zrobienia niedługo:  Poziomy Gry;  Wybór poziomu z ukonczonych; Select level window; 
+    /// GroupBox; Instrukcje i przyciski;
     /// 
-    /// BLEDY: Poruszanie przed rozpoczeciem gry -> Wyjatek (WYELIMINOWANE CHYBA - TESTY)
+    /// BLEDY: Poruszanie przed rozpoczeciem gry -> Wyjatek (WYELIMINOWANE, PRZETESTOWANE);
+    /// Bledne wskazywanie aktualnie rozgrywanego lvl (WYELIMINOWANE - TESTY);
+    /// enemy moving timespan nic nie zmienia!! ; 
+    /// ZNOWU PROBLEM Z ZAKONCZENIEM LVL (WYELIMINOWANE, PRZETESTOWANE);
+    /// Blad - czyszczenie image ekwipunku przy wczytywaniu gry (WYELIMINOWANE, PRZETESTOWANE);
+    /// 
     /// 
     /// Zrobione: Szkielet klasy GameController, (abstr) Position, Player; stworzone pole gry, 
     /// podstawowe dzialanie metody Move() (Equipment, zarys Player); Bindowanie pozycji gracza;
@@ -58,11 +62,15 @@ namespace TheJourneyGame
     /// dodano _basicAttacPower dla Player; Gdy enemy umiera dodaje sie exp; Enum EnemyType;
     /// SpawnEnemy(); Ghost i Ghoul; Ponowne rozgrywanie levelu; Śmierć!; Max player level;
     /// Statystyki Grid;
+    /// Serializacja, zapis i odczyt stanu gry -> SaveFile() i LoadFile(); 
+    /// Inicializacja wygladu ekwipunku po deserializacji 
+    /// Poprawa wczytywania - rozpoczecie od poziomu zakonczonego; Wskazywanie wybranej aktualnie broni;
+    /// Label wyswietlajacy aktualny poziom; IDeserializable;
     /// 
     /// 
     /// Do zrobienia:  
     /// dalsze usprawnianie metody Move(); Płynne poruszanie?; 
-    /// GRAFIKA (levelup), GUI; Ulepszanie poruszania się enemy; EXP I LVL?; Punkty rankingowe;
+    /// GRAFIKA (levelup), GUI; Ulepszanie poruszania się enemy; Punkty rankingowe;
     /// Atak i TakeAHit - rozwój w Player i Enemy(Obrona); POZIOMY!; Skille Specjalne;
     /// Zbilansowanie rozgrywki!; ReportBox; ZAPIS I ODCZYT;
     /// </summary>
@@ -106,7 +114,7 @@ namespace TheJourneyGame
         public void SaveGame()
         {
             SaveFileDialog saveFile = new SaveFileDialog();
-            saveFile.Filter = "Pliki zapisu (*.dat)|*.dat | Wszystkie pliki (*.*)|*.*";
+            saveFile.Filter = "Pliki zapisu (*.dat)|*.dat| Wszystkie pliki (*.*)|*.*";
             bool? result = saveFile.ShowDialog();
             if(result == true)
             {
@@ -118,13 +126,26 @@ namespace TheJourneyGame
         public void LoadGame()
         {
             OpenFileDialog openFile = new OpenFileDialog();
-            openFile.Filter = "Pliki zapisu (*.dat)|*.dat | Wszystkie pliki (*.*)|*.*";
+            openFile.Filter = "Pliki zapisu (*.dat)|*.dat| Wszystkie pliki (*.*)|*.*";
             bool? result = openFile.ShowDialog();
             if(result == true)
             {
                 GameController.LoadGame(openFile.FileName);
             }
         }
+
+   /*     public event MouseButtonEventHandler ChangeWeapon;
+        protected void OnChangeWeapon(string propertyName)
+        {
+            MouseButtonEventHandler changeWeapon = ChangeWeapon;
+            if (changeWeapon != null)
+            {
+                List<UIElementCollection> uiList = 
+                    (equipmentGrid.Children as IEnumerable<UIElementCollection>).ToList();
+
+            }
+                changeWeapon(this, new PropertyChangedEventArgs(propertyName));
+        }*/
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
@@ -155,6 +176,15 @@ namespace TheJourneyGame
                     case Key.Right:
                     case Key.Down:
                         GameController.Move((Direction)keyPressed);
+                        break;
+                    case Key.D1:
+                        GameController.ChangeWeapon(EquipmentType.Sword);
+                        break;
+                    case Key.D2:
+                        GameController.ChangeWeapon(EquipmentType.Bow);
+                        break;
+                    case Key.D3:
+                        GameController.ChangeWeapon(EquipmentType.Mace);
                         break;
                 }
             }
