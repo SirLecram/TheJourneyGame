@@ -26,6 +26,7 @@ namespace TheJourneyGame
         {
             get => _equipmentImagePathDictionary;
         }
+        public bool IsGamePaused { get; private set; }
 
         #region Binding Attributes
         public int PlayerHitPoints
@@ -100,6 +101,7 @@ namespace TheJourneyGame
             else
                 return new Point(0, 0);
         }
+
         #region Initialization
         private void InitializePlayerPositionBinding()
         {
@@ -140,13 +142,12 @@ namespace TheJourneyGame
             attacksOnPlayerTimer.Tick += AttackOnPlayerTimer_Tick;
             levelTimer.Interval = new TimeSpan(TimeSpan.FromMilliseconds(4000).Ticks);
             levelTimer.Tick += LevelTimer_Tick;
-
+            
         }
         private void InitializeLevel(int levelNumber)
         {
             _isLevelFinished = false;
             InitializeEnemies();
-            Enemy.Timer.Stop();
             switch (levelNumber)
             {
                 
@@ -248,19 +249,52 @@ namespace TheJourneyGame
                     levelTimer.Interval = new TimeSpan(TimeSpan.FromSeconds(5).Ticks);
                     break;
                 case 9:
+                    InitializePlayerPositionBinding();
 
+                    SpawnEquipment(EquipmentType.RedPotion);
+                    SpawnEnemy(EnemyType.Ghoul, 1);
+                    SpawnEnemy(EnemyType.Ghost, 2);
+                    _levelBatAmount = 10;
+                    _levelGhoulAmount = 6;
+                    _levelGhostAmount = 2;
+                    _levelPotionChancePer100 = 20;
+                    _levelWeapons.Add(EquipmentType.Mace);
+                    _levelTimeIntervalStep = new TimeSpan(TimeSpan.FromMilliseconds(100).Ticks);
+                    levelTimer.Interval = new TimeSpan(TimeSpan.FromSeconds(4.5).Ticks);
                     break;
                 case 10:
+                    InitializePlayerPositionBinding();
 
+                    SpawnEquipment(EquipmentType.RedPotion);
+                    SpawnEnemy(EnemyType.Bat, 2);
+                    SpawnEnemy(EnemyType.Ghoul, 1);
+                    SpawnEnemy(EnemyType.Ghost, 2);
+                    _levelBatAmount = 15;
+                    _levelGhoulAmount = 7;
+                    _levelGhostAmount = 5;
+                    _levelPotionChancePer100 = 20;
+                    _levelWeapons.Add(EquipmentType.Mace);
+                    _levelTimeIntervalStep = new TimeSpan(TimeSpan.FromMilliseconds(100).Ticks);
+                    levelTimer.Interval = new TimeSpan(TimeSpan.FromSeconds(5).Ticks);
                     break;
                 default:
                     InitializePlayerPositionBinding();
-                    SpawnEnemy(EnemyType.Ghost, 4);
-                    SpawnEquipment(EquipmentType.Mace);
-                    SpawnEquipment(EquipmentType.Bow);
+                    SpawnEquipment(EquipmentType.BluePotion);
+                    SpawnEquipment(EquipmentType.RedPotion);
+                    SpawnEnemy(EnemyType.Bat, 5);
+                    SpawnEnemy(EnemyType.Ghoul, 2);
+                    SpawnEnemy(EnemyType.Ghost, 2);
+                    _levelBatAmount = 20;
+                    _levelGhoulAmount = 10;
+                    _levelGhostAmount = 7;
+                    _levelPotionChancePer100 = 20;
+                    _levelWeapons.Add(EquipmentType.Mace);
+                    _levelTimeIntervalStep = new TimeSpan(TimeSpan.FromMilliseconds(100).Ticks);
+                    levelTimer.Interval = new TimeSpan(TimeSpan.FromSeconds(5).Ticks);
                     break;
 
             }
+            Enemy.Timer.Stop();
             _finishLocation = new Point(5, _playArea.ActualHeight / 2);
         }
         public void InitializeLevel()
@@ -500,7 +534,7 @@ namespace TheJourneyGame
                         newItem = new Bow(GetRandomLocation(), "Łuk", 4);
                         break;
                     case EquipmentType.Mace:
-                        newItem = new Mace(GetRandomLocation(), "Buława", 18);
+                        newItem = new Mace(GetRandomLocation(), "Buława", 15);
                         break;
                     case EquipmentType.BluePotion:
                         newItem = new Potion(GetRandomLocation(), "Niebieska mikstura", 12, eqType);
@@ -632,16 +666,19 @@ namespace TheJourneyGame
                 if (data.GetType() == _player.GetType())
                 {
                     Player playerToLoad = data as Player;
-                    ResetGame();
+                    
                     playerToLoad.ReloadImagesAfterDeserialization();
                     InitializePlayer(playerToLoad);
                     InitializeEqAfterDeserialization();
                     InitializePlayerPositionBinding();
                     _level = PlayerCompletedLevels+1;
+                    
                     OnAllPropertyChanged();
                     //newGameController.ReloadDataAfterDeserialization(GameController);
                 }
+                
             }
+            ResetGame();
         }
         public void SaveGame(string filePath)
         {
@@ -662,6 +699,14 @@ namespace TheJourneyGame
                 _equipmentImageDictionary[eq.EqType].Visibility = Visibility.Visible;
                 AddToolTipsToGui(eq);
             }
+        }
+        public void SetLevelNumber(int levelNumber)
+        {
+            if (levelNumber <= PlayerCompletedLevels + 1 && levelNumber>= 0)
+                _level = levelNumber;
+            else
+                throw new Exception("Invalid level number");
+            OnAllPropertyChanged();
         }
         private void OnAllPropertyChanged()
         {
@@ -703,6 +748,22 @@ namespace TheJourneyGame
             Enemy.Timer.Stop();
             
         }
+        public void PauseGame(bool isOn)
+        {
+            if(isOn)
+            {
+                Enemy.Timer.Stop();
+                attacksOnPlayerTimer.Stop();
+                levelTimer.Stop();
+            }
+            else
+            {
+                Enemy.Timer.Start();
+                attacksOnPlayerTimer.Start();
+                levelTimer.Start();
+            }
+            IsGamePaused = isOn;
+        }
         /// <summary>
         /// A method which is called by event when player move to selected direction
         /// </summary>
@@ -729,16 +790,10 @@ namespace TheJourneyGame
                     _player.LevelCompleted(_level);
                     _isEndGame = true;
                     OnAllPropertyChanged();
-                    //OnAllPropertyChanged();
-                    /*if (_level > _completedLevels + 1)
-                        _completedLevels = _level - 1;*/
-                    /*if (_level > 2)
-                        _level = 2;*/
                 }
             }
             if (!_enemiesList.Any() && !_isEndGame && !levelTimer.IsEnabled)
             {
-                //PROBLEM - naprawiony
                 _isLevelFinished = true;
                 
             }
@@ -806,7 +861,6 @@ namespace TheJourneyGame
             {
                 ChangeEquipmentAndImageOpacity(weaponToSelect);
             }
-            // NewImage_MouseDown()
         }
         #endregion
 

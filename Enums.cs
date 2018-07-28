@@ -29,6 +29,11 @@
     public interface IDeserializable
     {
         void ReloadImagesAfterDeserialization();
+        
+    }
+    public interface ISendData
+    {
+        void SendAndReciveLevel(int levelNumberToSend);
     }
 
 

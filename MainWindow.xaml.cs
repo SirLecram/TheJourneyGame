@@ -19,15 +19,13 @@ using Microsoft.Win32;
 namespace TheJourneyGame
 {
     /// <summary>
-    /// Ostatnio dodane: Poprawa błędu z podwójną inkrementacją _level po ukonczonym lvl;
-    /// poprawa bledu z zakonczeniem lvl; poprawa bledu z wyjatkiem przy ataku na przeciwnikow,
-    /// w przypadku gdy gracz zginal; Poprawki w spawnowaniu enemy i przedmiotow i levelTimer;
-    /// Dodanie nowych poziomow (2-5) i bilansowanie gry; Ghost potrafi sie teleportować;
-    /// Zamiana uzywanej broni numerami 1 - 3; Poprawiony blad z czyszczeniem ekwipunku po wczutaniu
-    /// wcześnejszego zapisu gry;
     /// 
-    /// Do zrobienia niedługo:  Poziomy Gry;  Wybór poziomu z ukonczonych; Select level window; 
-    /// GroupBox; Instrukcje i przyciski;
+    /// ##################### VERSION: BETA 1.0 #########################
+    /// 
+    /// Ostatnio dodane: PauseGame(); Instrukcje w GUI i Sterowanie; Dodane selectLevelWindow;
+    /// Działanie przycisku wyjdź;
+    /// 
+    /// Do zrobienia niedługo:  
     /// 
     /// BLEDY: Poruszanie przed rozpoczeciem gry -> Wyjatek (WYELIMINOWANE, PRZETESTOWANE);
     /// Bledne wskazywanie aktualnie rozgrywanego lvl (WYELIMINOWANE - TESTY);
@@ -66,6 +64,13 @@ namespace TheJourneyGame
     /// Inicializacja wygladu ekwipunku po deserializacji 
     /// Poprawa wczytywania - rozpoczecie od poziomu zakonczonego; Wskazywanie wybranej aktualnie broni;
     /// Label wyswietlajacy aktualny poziom; IDeserializable;
+    /// Poprawa błędu z podwójną inkrementacją _level po ukonczonym lvl;
+    /// poprawa bledu z zakonczeniem lvl; poprawa bledu z wyjatkiem przy ataku na przeciwnikow,
+    /// w przypadku gdy gracz zginal; Poprawki w spawnowaniu enemy i przedmiotow i levelTimer;
+    /// Dodanie nowych poziomow (2-8) i bilansowanie gry; Ghost potrafi sie teleportować;
+    /// Zamiana uzywanej broni numerami 1 - 3; Poprawiony blad z czyszczeniem ekwipunku po wczutaniu
+    /// wcześnejszego zapisu gry; Poziomy Gry;  Wybór poziomu z ukonczonych; Select level window; 
+    /// GroupBox; Instrukcje i przyciski;
     /// 
     /// 
     /// Do zrobienia:  
@@ -76,7 +81,7 @@ namespace TheJourneyGame
     /// </summary>
 
 
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, ISendData
     {
         GameController GameController;
         DateTime lastAttack;
@@ -94,7 +99,6 @@ namespace TheJourneyGame
 
         public void InitializeBinding()
         {
-           // playArea.Children.Add(new Rectangle());
             actualPos.DataContext = GameController;
             actualHp.DataContext = GameController;
             playerLevelLabel.DataContext = GameController;
@@ -131,27 +135,15 @@ namespace TheJourneyGame
             if(result == true)
             {
                 GameController.LoadGame(openFile.FileName);
-            }
+            }           
         }
-
-   /*     public event MouseButtonEventHandler ChangeWeapon;
-        protected void OnChangeWeapon(string propertyName)
-        {
-            MouseButtonEventHandler changeWeapon = ChangeWeapon;
-            if (changeWeapon != null)
-            {
-                List<UIElementCollection> uiList = 
-                    (equipmentGrid.Children as IEnumerable<UIElementCollection>).ToList();
-
-            }
-                changeWeapon(this, new PropertyChangedEventArgs(propertyName));
-        }*/
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            if(!countDownDTimer.IsEnabled)
+            Key keyPressed = e.Key;
+            if (!countDownDTimer.IsEnabled && !GameController.IsGamePaused)
             {
-                Key keyPressed = e.Key;
+                //Key keyPressed = e.Key;
                 switch (keyPressed)
                 {
                     case Key.A:
@@ -165,10 +157,10 @@ namespace TheJourneyGame
                         else
                             Debug.Print("Za wczesnie aby uzyc broni");
                         break;
-                    case Key.E:
+                    case Key.D:
                         GameController.UsePotion(EquipmentType.BluePotion);
                         break;
-                    case Key.R:
+                    case Key.F:
                         GameController.UsePotion(EquipmentType.RedPotion);
                         break;
                     case Key.Left:
@@ -187,6 +179,11 @@ namespace TheJourneyGame
                         GameController.ChangeWeapon(EquipmentType.Mace);
                         break;
                 }
+            }
+            if ((!countDownDTimer.IsEnabled && mainMenuStackPanel.Visibility != Visibility.Visible))
+            {
+                if (keyPressed == Key.P)
+                    GameController.PauseGame(!GameController.IsGamePaused);
             }
             
                 
@@ -230,9 +227,32 @@ namespace TheJourneyGame
             SaveGame();
         }
 
-        private void loadGameButton_Click(object sender, RoutedEventArgs e)
+        private void LoadGameButton_Click(object sender, RoutedEventArgs e)
         {
             LoadGame();
+        }
+
+        private void SelectLevelButton_Click(object sender, RoutedEventArgs e)
+        {
+            SelectLevelWindow levelWindow = new SelectLevelWindow(GameController.PlayerCompletedLevels, this);
+            levelWindow.Show();
+            this.Hide();
+        }
+
+        public void SendAndReciveLevel(int levelNumberToSend)
+        {
+            GameController.SetLevelNumber(levelNumberToSend);
+
+        }
+
+        private void ExitButton_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show("Are you sure you want to exit?", "Confirm",
+                MessageBoxButton.YesNo);
+            if(result == MessageBoxResult.Yes)
+            {
+                Close();
+            }
         }
     }
 }

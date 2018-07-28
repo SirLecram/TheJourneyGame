@@ -13,3 +13,5 @@ C:\Users\MarcelPC\Desktop\Na studia\Informatyka\C#\Ksiazka\TheJourneyGame\TheJou
 C:\Users\MarcelPC\Desktop\Na studia\Informatyka\C#\Ksiazka\TheJourneyGame\TheJourneyGame\obj\Debug\TheJourneyGame.csproj.CoreCompileInputs.cache
 C:\Users\MarcelPC\Desktop\Na studia\Informatyka\C#\Ksiazka\TheJourneyGame\TheJourneyGame\obj\Debug\TheJourneyGame.exe
 C:\Users\MarcelPC\Desktop\Na studia\Informatyka\C#\Ksiazka\TheJourneyGame\TheJourneyGame\obj\Debug\TheJourneyGame.pdb
+C:\Users\MarcelPC\Desktop\Na studia\Informatyka\C#\Ksiazka\TheJourneyGame\TheJourneyGame\obj\Debug\SelectLevelWindow.g.cs
+C:\Users\MarcelPC\Desktop\Na studia\Informatyka\C#\Ksiazka\TheJourneyGame\TheJourneyGame\obj\Debug\SelectLevelWindow.baml
